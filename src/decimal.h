@@ -8,12 +8,12 @@ typedef struct {
 } s21_decimal;
 
 typedef struct {
-  uint32_t mantissa[3];
+  uint32_t coef[3];
   uint32_t zero_bytes : 16;
   uint32_t exp : 8;
   uint32_t zero_bits : 7;
   uint32_t sign : 1;
-} s21_decimal_h;
+} dec_map;
 
 /**
  * @group Arithmetic
