@@ -59,17 +59,26 @@ void swap_ptr(void **ptr1, void **ptr2) {
   *ptr2 = temp;
 }
 
+dec_map sum_mantisses(dec_map val1, dec_map val2) {
+  dec_map ret = {0};
+
+
+
+  return ret;
+}
+
 void level_decimals(s21_decimal *value1, s21_decimal *value2) {
   dec_map *val_big = (dec_map *)value1;
   dec_map *val_sml = (dec_map *)value2;
-  int exp_diff = val_big->exp - val_sml->exp;
+  int exp_diff = val_sml->exp - val_big->exp;
   if (exp_diff < 0) {
     swap_ptr((void **)&val_big, (void **)&val_sml);
     exp_diff = -exp_diff;
   }
 
   for (int i = 0; i < exp_diff; i++) {
-    return;
+    *val_sml = sum_mantisses(shift_mantissa_left(val_sml, 3),
+                             shift_mantissa_left(val_sml, 1));
   }
 }
 
