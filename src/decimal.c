@@ -1,24 +1,39 @@
 #include "decimal.h"
-
 #include <stdio.h>
 
-int shift_bits_left_in_mantissa(dec_map *value) {
-  int ret = 0;
-  int overflowing = value->signal_bits >> 6 & 1;
+dec_map shift_mantissa_left_one(dec_map *value) {
+  dec_map shifted = {0};
+  int overflowing = value->zero_bytes >> 6 & 1;
   if (!overflowing) {
     int carry = 0;
     int highest_bit = 0;
     for (int i = 0; i < 3; i++) {
       highest_bit = value->mantissa[i] >> 31 & 1;
-      value->mantissa[i] <<= 1;
-      value->mantissa[i] |= carry;
+      shifted.mantissa[i] = value->mantissa[i] << 1;
+      shifted.mantissa[i] |= carry;
       carry = highest_bit;
     }
-    value->signal_bits <<= 1;
-    value->signal_bits |= carry;
+
+    shifted.zero_bytes = value->zero_bytes << 1;
+    shifted.zero_bytes |= carry;
   } else
-    ret = 1;
-  return ret;
+    shifted.signal_bits |= 0x1;
+
+  return shifted;
+}
+
+dec_map shift_mantiss_right_one(dec_map *value) {
+  dec_map shifted = {0};
+  int carry = 0;
+  int little_bit = value->zero_bytes & 1;
+  shifted.zero_bytes = value->zero_bytes >> 1;
+  for(int i = 2; i >= 0; i--){
+    shifted.mantissa[i] = value->mantissa[i] >> 1;
+    shifted.mantissa[i] |= carry << 31;
+    little_bit = value->mantissa[i] & 1;
+  }
+
+  return shifted;
 }
 
 void swap_ptr(void **ptr1, void **ptr2) {
@@ -48,7 +63,7 @@ int s21_valid_decimal(s21_decimal *value) {
 
 void print_bytes(s21_decimal *value) {
   unsigned char *byte = (unsigned char *)value;
-  for (size_t i = 0; i < sizeof(*value); i++) {
+  for (int i = sizeof(s21_decimal) - 1; i >= 0; i--) {
     printf("%.2x ", *(byte + i));
   }
   printf("\n");
@@ -70,8 +85,13 @@ int s21_add(s21_decimal val1, s21_decimal val2, s21_decimal *res) {
 }
 
 int main() {
-  s21_decimal dec = {0};
-  // dec_map *val = (dec_map*)&dec;
+  // s21_decimal dec = {0};
+  dec_map m = {{0, 0, 0x80000000}, 0, 0, 0, 0};
 
-  print_bytes(&dec);
+  print_bytes((s21_decimal *)&m);
+  dec_map s = shift_mantissa_left_one(&m);
+  print_bytes((s21_decimal *)&s);
+  m = shift_mantiss_right_one(&s);
+
+  print_bytes((s21_decimal *)&m);
 }
