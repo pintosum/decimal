@@ -6,34 +6,51 @@ dec_map shift_mantissa_left_one(dec_map *value) {
   int overflowing = value->zero_bytes >> 6 & 1;
   if (!overflowing) {
     int carry = 0;
-    int highest_bit = 0;
     for (int i = 0; i < 3; i++) {
-      highest_bit = value->mantissa[i] >> 31 & 1;
       shifted.mantissa[i] = value->mantissa[i] << 1;
       shifted.mantissa[i] |= carry;
-      carry = highest_bit;
+      carry = value->mantissa[i] >> 31 & 1;
     }
 
     shifted.zero_bytes = value->zero_bytes << 1;
     shifted.zero_bytes |= carry;
   } else
-    shifted.signal_bits |= 0x1;
+    shifted.signal_bits |= 0x2;
 
   return shifted;
 }
 
-dec_map shift_mantiss_right_one(dec_map *value) {
+dec_map shift_mantissa_right_one(dec_map *value) {
   dec_map shifted = {0};
-  int carry = 0;
-  int little_bit = value->zero_bytes & 1;
+  unsigned int carry = value->zero_bytes & 1;
   shifted.zero_bytes = value->zero_bytes >> 1;
-  for(int i = 2; i >= 0; i--){
+  for (int i = 2; i >= 0; i--) {
     shifted.mantissa[i] = value->mantissa[i] >> 1;
     shifted.mantissa[i] |= carry << 31;
-    little_bit = value->mantissa[i] & 1;
+    carry = value->mantissa[i] & 1;
   }
 
   return shifted;
+}
+
+dec_map shift_mantissa_left(dec_map *value, int shift) {
+  dec_map ret = *value;
+
+  while (shift--) {
+    ret = shift_mantissa_left_one(&ret);
+  }
+
+  return ret;
+}
+
+dec_map shift_mantissa_right(dec_map *value, int shift) {
+  dec_map ret = *value;
+
+  while (shift--) {
+    ret = shift_mantissa_right_one(&ret);
+  }
+
+  return ret;
 }
 
 void swap_ptr(void **ptr1, void **ptr2) {
@@ -86,12 +103,12 @@ int s21_add(s21_decimal val1, s21_decimal val2, s21_decimal *res) {
 
 int main() {
   // s21_decimal dec = {0};
-  dec_map m = {{0, 0, 0x80000000}, 0, 0, 0, 0};
+  dec_map m = {{0, 0, 0x800000}, 0, 0, 0, 0};
 
   print_bytes((s21_decimal *)&m);
   dec_map s = shift_mantissa_left_one(&m);
   print_bytes((s21_decimal *)&s);
-  m = shift_mantiss_right_one(&s);
+  m = shift_mantissa_left_one(&s);
 
   print_bytes((s21_decimal *)&m);
 }
