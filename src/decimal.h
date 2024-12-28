@@ -5,15 +5,8 @@
 
 typedef struct {
   int32_t bits[4];
+  // or int
 } s21_decimal;
-
-typedef struct {
-  uint32_t mantissa[3];
-  uint32_t zero_bytes : 16;
-  uint32_t exp : 8;
-  uint32_t signal_bits : 7;
-  uint32_t sign : 1;
-} dec_map;
 
 /**
  * @group Arithmetic

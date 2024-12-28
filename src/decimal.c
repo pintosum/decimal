@@ -1,70 +1,12 @@
 #include "decimal.h"
+#include "binary.h"
 #include <stdio.h>
 
-dec_map shift_mantissa_left_one(dec_map *value) {
-  dec_map shifted = {0};
-  int overflowing = value->zero_bytes >> 6 & 1;
-  if (!overflowing) {
-    int carry = 0;
-    for (int i = 0; i < 3; i++) {
-      shifted.mantissa[i] = value->mantissa[i] << 1;
-      shifted.mantissa[i] |= carry;
-      carry = value->mantissa[i] >> 31 & 1;
-    }
-
-    shifted.zero_bytes = value->zero_bytes << 1;
-    shifted.zero_bytes |= carry;
-  } else
-    shifted.signal_bits |= 0x2;
-
-  return shifted;
-}
-
-dec_map shift_mantissa_right_one(dec_map *value) {
-  dec_map shifted = {0};
-  unsigned int carry = value->zero_bytes & 1;
-  shifted.zero_bytes = value->zero_bytes >> 1;
-  for (int i = 2; i >= 0; i--) {
-    shifted.mantissa[i] = value->mantissa[i] >> 1;
-    shifted.mantissa[i] |= carry << 31;
-    carry = value->mantissa[i] & 1;
-  }
-
-  return shifted;
-}
-
-dec_map shift_mantissa_left(dec_map *value, int shift) {
-  dec_map ret = *value;
-
-  while (shift--) {
-    ret = shift_mantissa_left_one(&ret);
-  }
-
-  return ret;
-}
-
-dec_map shift_mantissa_right(dec_map *value, int shift) {
-  dec_map ret = *value;
-
-  while (shift--) {
-    ret = shift_mantissa_right_one(&ret);
-  }
-
-  return ret;
-}
 
 void swap_ptr(void **ptr1, void **ptr2) {
   void *temp = *ptr1;
   *ptr1 = *ptr2;
   *ptr2 = temp;
-}
-
-dec_map sum_mantisses(dec_map val1, dec_map val2) {
-  dec_map ret = {0};
-
-
-
-  return ret;
 }
 
 void level_decimals(s21_decimal *value1, s21_decimal *value2) {
@@ -86,6 +28,7 @@ int s21_valid_decimal(s21_decimal *value) {
   dec_map *val = (dec_map *)value;
   return val->exp <= 28 && !val->signal_bits && !val->zero_bytes;
 }
+
 
 void print_bytes(s21_decimal *value) {
   unsigned char *byte = (unsigned char *)value;
