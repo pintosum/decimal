@@ -17,8 +17,11 @@ dec_map shift_mantissa_left_one(dec_map *value);
 dec_map shift_mantissa_right_one(dec_map *value);
 dec_map shift_mantissa_left(dec_map *value, int shift);
 dec_map shift_mantissa_right(dec_map *value, int shift);
+dec_map decimal_xor(dec_map *val1, dec_map *val2);
 dec_map twos_complement(dec_map *value);
 dec_map get_one();
-dec_map sum_mantisses(dec_map val1, dec_map val2);
+int decimal_is_zero(dec_map *value);
+dec_map decimal_and(dec_map *val1, dec_map *val2);
+dec_map add_mantisses(dec_map val1, dec_map val2);
 
 #endif
