@@ -23,5 +23,8 @@ dec_map get_one();
 int decimal_is_zero(dec_map *value);
 dec_map decimal_and(dec_map *val1, dec_map *val2);
 dec_map add_mantisses(dec_map val1, dec_map val2);
+dec_map sub_mantisses(dec_map val1, dec_map val2);
+
+unsigned int most_significant_bit(dec_map value);
 
 #endif

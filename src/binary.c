@@ -53,6 +53,7 @@ dec_map decimal_xor(dec_map *val1, dec_map *val2) {
   for (int i = 0; i < 3; i++) {
     ret.mantissa[i] ^= val2->mantissa[i];
   }
+  ret.zero_bytes ^= val2->zero_bytes;
   return ret;
 }
 
@@ -60,6 +61,16 @@ dec_map decimal_and(dec_map *val1, dec_map *val2) {
   dec_map ret = *val1;
   for (int i = 0; i < 3; i++) {
     ret.mantissa[i] &= val2->mantissa[i];
+  }
+  ret.zero_bytes &= val2->zero_bytes;
+  return ret;
+}
+
+unsigned int most_significant_bit(dec_map value) {
+  unsigned int ret = 0;
+  while (!decimal_is_zero(&value)) {
+    value = shift_mantissa_right_one(&value);
+    ret++;
   }
   return ret;
 }
@@ -78,6 +89,7 @@ dec_map get_one() { return (dec_map){{1, 0, 0}, 0, 0, 0}; }
 int decimal_is_zero(dec_map *value) {
   int ret = 1;
   for (int i = 0; i < 3; i++) ret *= !value->mantissa[i];
+  ret *= !value->zero_bytes;
   return ret;
 }
 
@@ -92,12 +104,17 @@ dec_map add_mantisses(dec_map val1, dec_map val2) {
   return ret;
 }
 
+dec_map sub_mantisses(dec_map val1, dec_map val2) {
+  val2 = twos_complement(&val2);
+  return sub_mantisses(val1, val2);
+}
+
 #include <stdio.h>
 
 int main() {
-  dec_map f = {{0xFFFFFFFF, 1, 0}, 0, 0, 0};
+  dec_map f = {{0xFFFFFFFF, 1, 0}};
   for (int i = 0; i < 100000; i++) {
     f = add_mantisses(f, get_one());
   }
-  printf("%d %d\n", f.mantissa[0], f.mantissa[1]);
+  printf("%u %u  %u\n", f.mantissa[0], f.mantissa[1], f.zero_bytes);
 }
