@@ -118,10 +118,15 @@ dec_map mult_by_pow_of_ten(dec_map *value, int power) {
   return ret;
 }
 
+int div_by_ten_by_sub(dec_map value){
+  int ret = 1;
+  while(value)
+}
 
 int len_of_number(dec_map value){
   int ret = 1;
   while(!decimal_is_zero(&value)){
+
   }
   return ret;
 }
