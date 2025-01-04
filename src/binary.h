@@ -18,12 +18,16 @@ dec_map shift_mantissa_right_one(dec_map *value);
 dec_map shift_mantissa_left(dec_map *value, int shift);
 dec_map shift_mantissa_right(dec_map *value, int shift);
 dec_map decimal_xor(dec_map *val1, dec_map *val2);
-dec_map twos_complement(dec_map *value);
+dec_map decimal_and(dec_map *val1, dec_map *val2);
+
 dec_map get_one();
 int decimal_is_zero(dec_map *value);
-dec_map decimal_and(dec_map *val1, dec_map *val2);
+
+dec_map twos_complement(dec_map *value);
 dec_map add_mantisses(dec_map val1, dec_map val2);
 dec_map sub_mantisses(dec_map val1, dec_map val2);
+
+dec_map mult_by_pow_of_ten(dec_map *value, int power);
 
 unsigned int most_significant_bit(dec_map value);
 

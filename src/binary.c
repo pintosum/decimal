@@ -109,6 +109,24 @@ dec_map sub_mantisses(dec_map val1, dec_map val2) {
   return sub_mantisses(val1, val2);
 }
 
+dec_map mult_by_pow_of_ten(dec_map *value, int power) {
+  dec_map ret = *value;
+  while (power--) {
+    ret = add_mantisses(shift_mantissa_left(&ret, 3),
+                        shift_mantissa_left(&ret, 1));
+  }
+  return ret;
+}
+
+
+int len_of_number(dec_map value){
+  int ret = 1;
+  while(!decimal_is_zero(&value)){
+  }
+  return ret;
+}
+
+
 #include <stdio.h>
 
 int main() {
@@ -118,3 +136,5 @@ int main() {
   }
   printf("%u %u  %u\n", f.mantissa[0], f.mantissa[1], f.zero_bytes);
 }
+
+

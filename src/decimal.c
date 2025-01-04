@@ -18,11 +18,7 @@ void level_decimals(s21_decimal *value1, s21_decimal *value2) {
     swap_ptr((void **)&val_big, (void **)&val_sml);
     exp_diff = -exp_diff;
   }
-
-  for (int i = 0; i < exp_diff; i++) {
-    *val_sml = add_mantisses(shift_mantissa_left(val_sml, 3),
-                             shift_mantissa_left(val_sml, 1));
-  }
+  *val_sml = mult_by_pow_of_ten(val_sml, exp_diff);
 }
 
 int s21_valid_decimal(s21_decimal *value) {
