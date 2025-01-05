@@ -29,7 +29,10 @@ dec_map sub_mantisses(dec_map val1, dec_map val2);
 
 dec_map mult_by_pow_of_ten(dec_map *value, int power);
 
-unsigned int most_significant_bit(dec_map value);
+dec_map div_by_ten(dec_map *value);
+dec_map normalize_decimal(dec_map value);
+
+int most_significant_bit(dec_map value);
 int len_of_number(dec_map value);
 
 #endif

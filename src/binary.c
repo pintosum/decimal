@@ -14,7 +14,7 @@ dec_map shift_mantissa_left_one(dec_map *value) {
     shifted.zero_bytes = value->zero_bytes << 1;
     shifted.zero_bytes |= carry;
   } else
-    shifted.signal_bits |= 0x2;
+    shifted.signal_bits |= OVERFLOW;
 
   return shifted;
 }
@@ -124,6 +124,33 @@ int len_of_number(dec_map value){
   return (int)(binary_len * log_of_2) + 1;
 }
 
+int divisible_by_ten(dec_map value){
+  uint64_t sum = (uint64_t)value.mantissa[0] + (uint64_t)value.mantissa[1] + (uint64_t)value.mantissa[2] + (uint64_t)value.zero_bytes;
+  int divisible = !(sum % 5) && !(value.mantissa[0] % 2);
+  return divisible;
+}
+
+dec_map div_by_ten(dec_map *value){
+  dec_map q, r;
+  q = add_mantisses(shift_mantissa_right(value, 1), shift_mantissa_right(value, 2));
+  q = add_mantisses(q, shift_mantissa_right(&q, 4));
+  q = add_mantisses(q, shift_mantissa_right(&q, 8));
+  q = add_mantisses(q, shift_mantissa_right(&q, 16));
+  q = shift_mantissa_right(&q, 3);
+  r = mult_by_pow_of_ten(&q, 1);
+  r = sub_mantisses(*value, r);
+  r = add_mantisses(r, (dec_map){6, 0, 0});
+  r = shift_mantissa_right(&r, 4);
+  return add_mantisses(q, r);
+}
+
+dec_map normalize_decimal(dec_map value){
+  while(value.exp && divisible_by_ten(value)){
+    value = div_by_ten(&value);
+    value.exp--;
+  }
+  return value;
+}
 
 #include <stdio.h>
 
