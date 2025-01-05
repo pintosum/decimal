@@ -97,7 +97,7 @@ dec_map add_mantisses(dec_map val1, dec_map val2) {
 
 dec_map sub_mantisses(dec_map val1, dec_map val2) {
   val2 = twos_complement(&val2);
-  return sub_mantisses(val1, val2);
+  return add_mantisses(val1, val2);
 }
 
 dec_map mult_by_pow_of_ten(dec_map *value, int power) {
@@ -142,6 +142,7 @@ dec_map div_by_ten(dec_map *value){
   r = add_mantisses(r, (dec_map){6, 0, 0});
   r = shift_mantissa_right(&r, 4);
   return add_mantisses(q, r);
+  // return q;
 }
 
 dec_map normalize_decimal(dec_map value){
@@ -155,11 +156,15 @@ dec_map normalize_decimal(dec_map value){
 #include <stdio.h>
 
 int main() {
-  dec_map f = {{0xFFFFFFFF, 1, 0}};
-  for (int i = 0; i < 100000; i++) {
-    f = add_mantisses(f, get_one());
-  }
-  printf("%u %u  %u\n", f.mantissa[0], f.mantissa[1], f.zero_bytes);
+  dec_map f = {{0xFFFFFFFA, 0, 0}};
+  int d = divisible_by_ten(f);
+  printf("%d\n", d);
+  int h = 6789 + d;
+  
+  dec_map s = div_by_ten(&f);
+  printf("%u %u  %u\n", s.mantissa[0], s.mantissa[1], s.zero_bytes);
+  
+  //printf("%u %u  %u\n", f.mantissa[0], f.mantissa[1], f.zero_bytes);
 }
 
 
