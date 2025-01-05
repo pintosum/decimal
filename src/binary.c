@@ -66,15 +66,6 @@ dec_map decimal_and(dec_map *val1, dec_map *val2) {
   return ret;
 }
 
-unsigned int most_significant_bit(dec_map value) {
-  unsigned int ret = 0;
-  while (!decimal_is_zero(&value)) {
-    value = shift_mantissa_right_one(&value);
-    ret++;
-  }
-  return ret;
-}
-
 dec_map twos_complement(dec_map *value) {
   dec_map ret = *value;
   for (int i = 0; i < 3; i++) {
@@ -118,17 +109,19 @@ dec_map mult_by_pow_of_ten(dec_map *value, int power) {
   return ret;
 }
 
-int div_by_ten_by_sub(dec_map value){
-  int ret = 1;
-  while(value)
+int most_significant_bit(dec_map value) {
+  int ret = 0;
+  while (!decimal_is_zero(&value)) {
+    value = shift_mantissa_right_one(&value);
+    ret++;
+  }
+  return ret;
 }
 
 int len_of_number(dec_map value){
-  int ret = 1;
-  while(!decimal_is_zero(&value)){
-
-  }
-  return ret;
+  double log_of_2 = 0.301;
+  int binary_len = most_significant_bit(value);
+  return (int)(binary_len * log_of_2) + 1;
 }
 
 
