@@ -1,4 +1,9 @@
 #include "binary.h"
+#include <stdio.h>
+
+void print_dec(dec_map r, char name){
+  printf("%c : %u %u %u  %u\n", name, r.mantissa[0], r.mantissa[1], r.mantissa[2], r.zero_bytes);
+}
 
 dec_map shift_mantissa_left_one(dec_map *value) {
   dec_map shifted = *value;
@@ -97,6 +102,8 @@ dec_map add_mantisses(dec_map val1, dec_map val2) {
 
 dec_map sub_mantisses(dec_map val1, dec_map val2) {
   val2 = twos_complement(&val2);
+  printf("two_comp");
+  print_dec(val2, 'l');
   return add_mantisses(val1, val2);
 }
 
@@ -137,10 +144,17 @@ dec_map div_by_ten(dec_map *value){
   q = add_mantisses(q, shift_mantissa_right(&q, 8));
   q = add_mantisses(q, shift_mantissa_right(&q, 16));
   q = shift_mantissa_right(&q, 3);
+  
+  print_dec(q, 'q');
+
   r = mult_by_pow_of_ten(&q, 1);
+  print_dec(r, 'r');
   r = sub_mantisses(*value, r);
+  print_dec(r, 'r');
   r = add_mantisses(r, (dec_map){6, 0, 0});
+  print_dec(r, 'r');
   r = shift_mantissa_right(&r, 4);
+  print_dec(r, 'r');
   return add_mantisses(q, r);
   // return q;
 }
@@ -153,16 +167,20 @@ dec_map normalize_decimal(dec_map value){
   return value;
 }
 
-#include <stdio.h>
+
 
 int main() {
   dec_map f = {{0xFFFFFFFA, 0, 0}};
-  int d = divisible_by_ten(f);
+  dec_map q = {{0xA7640000, 0x0DE0B6B3, 0}};
+  unsigned long suka = 0xFFFFFFFFFFFFFFFF;
+  printf("%lu\n", suka);
+  int d = divisible_by_ten(q);
   printf("%d\n", d);
   int h = 6789 + d;
+  printf("%u %u  %u\n", f.mantissa[0], f.mantissa[1], f.mantissa[2]);
   
   dec_map s = div_by_ten(&f);
-  printf("%u %u  %u\n", s.mantissa[0], s.mantissa[1], s.zero_bytes);
+  printf("%u %u %u  %u\n", s.mantissa[0], s.mantissa[1], s.mantissa[2], s.zero_bytes);
   
   //printf("%u %u  %u\n", f.mantissa[0], f.mantissa[1], f.zero_bytes);
 }
