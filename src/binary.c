@@ -1,4 +1,5 @@
 #include "binary.h"
+#include <stdint.h>
 #include <stdio.h>
 
 void print_dec(dec_map r, char *name){
@@ -159,6 +160,17 @@ dec_map div_by_ten(dec_map *value){
   // return q;
 }
 
+dec_map div_by_ten_simple(dec_map val){
+  uint32_t carry = val.zero_bytes % 10;
+  val.zero_bytes /= 10;
+  for(int i = 2; i >= 0; i--){
+    uint32_t new = val.mantissa[i] / 10 + carry * (1 << 31);
+    carry = val.mantissa[i] % 10;
+    val.mantissa[i] = new;
+  }
+  return val;
+}
+
 dec_map normalize_decimal(dec_map value){
   while(value.exp && divisible_by_ten(value)){
     value = div_by_ten(&value);
@@ -171,14 +183,11 @@ dec_map normalize_decimal(dec_map value){
 
 int main() {
   dec_map f = {{0xFFFFFFFA, 0, 0}};
-  dec_map q = {{0xA7640000, 0x0DE0B6B3, 0}};
-  int d = divisible_by_ten(q);
-  printf("%d\n", d);
-  int h = 6789 + d;
-  printf("%u %u  %u\n", f.mantissa[0], f.mantissa[1], f.mantissa[2]);
+  dec_map l = {{0xA7640000, 0x0DE0B6B3, 0}};
+  print_dec(l, "l");
 
-  dec_map s = div_by_ten(&f);
-  printf("%u %u %u  %u\n", s.mantissa[0], s.mantissa[1], s.mantissa[2], s.zero_bytes);
+  dec_map s = div_by_ten_simple(l);
+  print_dec(s, "s");
 
   //printf("%u %u  %u\n", f.mantissa[0], f.mantissa[1], f.zero_bytes);
 }
