@@ -39,6 +39,7 @@ dec_map shift_mantissa_right_one(dec_map *value) {
   return shifted;
 }
 
+
 dec_map shift_mantissa_left(dec_map *value, int shift) {
   dec_map ret = *value;
   while (shift--) {
@@ -95,6 +96,7 @@ int decimal_is_zero(dec_map *value) {
 
 dec_map add_mantisses(dec_map val1, dec_map val2) {
   dec_map ret = val1;
+ // ret.sign = 0;
   while (!decimal_is_zero(&val2)) {
     dec_map carry_bits = decimal_and(&ret, &val2);
     carry_bits = shift_mantissa_left_one(&carry_bits);
@@ -106,8 +108,12 @@ dec_map add_mantisses(dec_map val1, dec_map val2) {
 
 dec_map sub_mantisses(dec_map val1, dec_map val2) {
   val2 = twos_complement(&val2);
-  print_dec(val2, "two_compl");
-  return add_mantisses(val1, val2);
+  val2 = add_mantisses(val1, val2);
+  if (val2.zero_bytes == 0xFFFF){
+    val2 = twos_complement(&val2);
+    val2.sign = 1;
+  }
+  return val2;
 }
 
 dec_map mult_by_pow_of_ten(dec_map *value, int power) {
@@ -152,16 +158,12 @@ dec_map div_by_ten(dec_map *value) {
   q = add_mantisses(q, shift_mantissa_right(&q, 64));
   q = shift_mantissa_right(&q, 3);
 
-  print_dec(q, "q");
+  // print_dec(q, "q");
 
   r = mult_by_pow_of_ten(&q, 1);
-  print_dec(r, "r");
   r = sub_mantisses(*value, r);
-  print_dec(r, "r");
   r = add_mantisses(r, (dec_map){6, 0, 0});
-  print_dec(r, "r");
   r = shift_mantissa_right(&r, 4);
-  print_dec(r, "r");
   return add_mantisses(q, r);
   // return q;
 }
@@ -175,12 +177,13 @@ dec_map normalize_decimal(dec_map value) {
 }
 
 int main() {
-  dec_map f = {{0xFFFFFFFA, 0, 0}};
-  dec_map l = {{0xA7640000, 0x0DE0B6B3, 0x3294812}};
+  dec_map f = {{0xA, 0, 0}};
+  dec_map l = {{0xF, 0, 0}};
   print_dec(l, "l");
 
-  dec_map s = div_by_ten(&l);
-  print_dec(s, "s");
+  //dec_map s = div_by_ten(&l);
+  dec_map sub = sub_mantisses(f, l);
+  print_dec(sub, "diff");
 
   // printf("%u %u  %u\n", f.mantissa[0], f.mantissa[1], f.zero_bytes);
 }

@@ -18,6 +18,10 @@ void level_decimals(s21_decimal *value1, s21_decimal *value2) {
     swap_ptr((void **)&val_big, (void **)&val_sml);
     exp_diff = -exp_diff;
   }
+  int len = len_of_number(*val_sml);
+  if(30 - len < exp_diff){
+    exp_diff = exp_diff - 30 + len;
+  }
   *val_sml = mult_by_pow_of_ten(val_sml, exp_diff);
 }
 
@@ -34,20 +38,35 @@ void print_bytes(s21_decimal *value) {
   printf("\n");
 }
 
+int is_negative(s21_decimal val){
+  return val.bits[3] >> 31;
+}
+
 int s21_add(s21_decimal val1, s21_decimal val2, s21_decimal *res) {
   int ret = 0;
+  dec_map* dec1 = (dec_map *)&val1;
+  dec_map* dec2 = (dec_map *)&val2;
+  dec_map result;
 
   if (res && s21_valid_decimal(&val1) && s21_valid_decimal(&val2)) {
-    return 1;
+    if (!dec1->sign && dec2->sign){
+      result = sub_mantisses(*dec1, *dec2);
+    }
+    else if(dec1->sign && !dec2->sign){
+      result = sub_mantisses(*dec2, *dec1);
+    }
+    else{
+      result = add_mantisses(*dec1, *dec2);
+    }
   } else {
     ret = 4;
     if (res) {
-      // *res = INF;
     }
   }
 
   return ret;
 }
+
 
 int main() {
   // s21_decimal dec = {0};
