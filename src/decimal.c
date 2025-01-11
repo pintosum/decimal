@@ -51,9 +51,11 @@ int s21_add(s21_decimal val1, s21_decimal val2, s21_decimal *res) {
   if (res && s21_valid_decimal(&val1) && s21_valid_decimal(&val2)) {
     if (!dec1->sign && dec2->sign){
       result = sub_mantisses(*dec1, *dec2);
+      result.sign += dec1->sign;
     }
     else if(dec1->sign && !dec2->sign){
       result = sub_mantisses(*dec2, *dec1);
+      result.sign += dec2->sign;
     }
     else{
       result = add_mantisses(*dec1, *dec2);
