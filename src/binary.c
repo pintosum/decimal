@@ -1,5 +1,6 @@
 #include "binary.h"
 
+#include <stdint.h>
 #include <stdio.h>
 
 void print_dec(dec_map r, char *name) {
@@ -20,8 +21,8 @@ dec_map shift_mantissa_left_one(dec_map *value) {
 
   shifted.zero_bytes = value->zero_bytes << 1;
   shifted.zero_bytes |= carry;
-  // } else
-  //   shifted.signal_bits |= OVERFLOW;
+  //} else
+  // shifted.signal_bits |= OVERFLOW;
 
   return shifted;
 }
@@ -94,6 +95,7 @@ int decimal_is_zero(dec_map *value) {
 
 dec_map add_mantisses(dec_map val1, dec_map val2) {
   dec_map ret = val1;
+  // ret.sign = 0;
   while (!decimal_is_zero(&val2)) {
     dec_map carry_bits = decimal_and(&ret, &val2);
     carry_bits = shift_mantissa_left_one(&carry_bits);
@@ -105,8 +107,12 @@ dec_map add_mantisses(dec_map val1, dec_map val2) {
 
 dec_map sub_mantisses(dec_map val1, dec_map val2) {
   val2 = twos_complement(&val2);
-  print_dec(val2, "two_compl");
-  return add_mantisses(val1, val2);
+  val2 = add_mantisses(val1, val2);
+  if (val2.zero_bytes == 0xFFFF) {
+    val2 = twos_complement(&val2);
+    val2.sign = 1;
+  }
+  return val2;
 }
 
 dec_map mult_by_pow_of_ten(dec_map *value, int power) {
@@ -147,18 +153,16 @@ dec_map div_by_ten(dec_map *value) {
   q = add_mantisses(q, shift_mantissa_right(&q, 4));
   q = add_mantisses(q, shift_mantissa_right(&q, 8));
   q = add_mantisses(q, shift_mantissa_right(&q, 16));
+  q = add_mantisses(q, shift_mantissa_right(&q, 32));
+  q = add_mantisses(q, shift_mantissa_right(&q, 64));
   q = shift_mantissa_right(&q, 3);
 
-  print_dec(q, "q");
+  // print_dec(q, "q");
 
   r = mult_by_pow_of_ten(&q, 1);
-  print_dec(r, "r");
   r = sub_mantisses(*value, r);
-  print_dec(r, "r");
   r = add_mantisses(r, (dec_map){6, 0, 0});
-  print_dec(r, "r");
   r = shift_mantissa_right(&r, 4);
-  print_dec(r, "r");
   return add_mantisses(q, r);
   // return q;
 }
@@ -172,19 +176,13 @@ dec_map normalize_decimal(dec_map value) {
 }
 
 int main() {
-  dec_map f = {{0xFFFFFFFA, 0, 0}};
-  dec_map q = {{0xA7640000, 0x0DE0B6B3, 0}};
-  unsigned long suka = 0xFFFFFFFFFFFFFFFF;
-  printf("%lu\n", suka);
-  int d = divisible_by_ten(q);
-  printf("%d\n", d);
-  int h = 6789 + d;
-  printf("%u %u %u  %u\n", f.mantissa[0], f.mantissa[1], f.mantissa[2],
-         f.zero_bytes);
+  dec_map f = {{0xA, 0, 0}};
+  dec_map l = {{0xF, 0, 0}};
+  print_dec(l, "l");
 
-  dec_map s = div_by_ten(&f);
-  printf("%u %u %u  %u\n", s.mantissa[0], s.mantissa[1], s.mantissa[2],
-         s.zero_bytes);
+  // dec_map s = div_by_ten(&l);
+  dec_map sub = sub_mantisses(f, l);
+  print_dec(sub, "diff");
 
   // printf("%u %u  %u\n", f.mantissa[0], f.mantissa[1], f.zero_bytes);
 }
