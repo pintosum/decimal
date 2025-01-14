@@ -175,14 +175,18 @@ dec_map normalize_decimal(dec_map value) {
   return value;
 }
 
-int main() {
-  dec_map f = {{0xA, 0, 0}};
-  dec_map l = {{0xF, 0, 0}};
-  print_dec(l, "l");
-
-  // dec_map s = div_by_ten(&l);
-  dec_map sub = sub_mantisses(f, l);
-  print_dec(sub, "diff");
-
-  // printf("%u %u  %u\n", f.mantissa[0], f.mantissa[1], f.zero_bytes);
+int s21_valid_dec_map(dec_map *val) {
+  return val->exp <= 28 && !val->signal_bits && !val->zero_bytes;
 }
+
+// int main() {
+//   dec_map f = {{0xA, 0, 0}};
+//   dec_map l = {{0xF, 0, 0}};
+//   print_dec(l, "l");
+
+//   // dec_map s = div_by_ten(&l);
+//   dec_map sub = sub_mantisses(f, l);
+//   print_dec(sub, "diff");
+
+//   // printf("%u %u  %u\n", f.mantissa[0], f.mantissa[1], f.zero_bytes);
+// }
