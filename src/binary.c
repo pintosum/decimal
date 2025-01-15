@@ -179,7 +179,7 @@ dec_map div_by_ten_simple(dec_map value, int *remainder){
 
 dec_map normalize_decimal(dec_map value) {
   while (value.exp && divisible_by_ten(value)) {
-    value = div_by_ten(&value);
+    value = div_by_ten(&value, NULL);
     value.exp--;
   }
   return value;

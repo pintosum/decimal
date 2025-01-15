@@ -22,25 +22,17 @@ int level_decimals(s21_decimal *value1, s21_decimal *value2, int *last_digit) {
   dec_map *val_big = (dec_map *)value1;
   dec_map *val_sml = (dec_map *)value2;
   int exp_diff = val_sml->exp - val_big->exp;
-  printf("exp_diff: %d\n", exp_diff);
   if (exp_diff < 0) {
     swap_ptr((void **)&val_big, (void **)&val_sml);
     exp_diff = -exp_diff;
   }
-
-  printf("\nval1 : %u\nval2 : %u\n\n", val_big->mantissa[0], val_sml->mantissa[0]);
-  printf("exp_diff: %d\n", exp_diff);
   int len = len_of_number(*val_big);
-  printf("len: %d\n", len);
   if (30 - len < exp_diff) {
     exp_diff = exp_diff - 30 + len;
-    while(30 - val_big->exp--)
-      *val_big = div_by_ten(val_big, last_digit);
+    while(30 - val_sml->exp--)
+      *val_sml= div_by_ten(val_big, last_digit);
   }
-  printf("exp_diff: %d\n", exp_diff);
   *val_big = mult_by_pow_of_ten(val_big, exp_diff);
-  puts("h");
-  print_bytes(value2);
   return val_big->exp + exp_diff;
 }
 
@@ -58,12 +50,9 @@ int s21_add(s21_decimal val1, s21_decimal val2, s21_decimal *res) {
   dec_map result;
 
   if (res && s21_valid_decimal(&val1) && s21_valid_decimal(&val2)) {
-    uint32_t exp = level_decimals(&val1, &val2);
-    puts("val1 : ");
+    uint32_t exp = level_decimals(&val1, &val2, NULL);
     print_bytes(&val1);
-    puts("val2 : ");
     print_bytes(&val2);
-    puts("");
     if (!dec1->sign && dec2->sign) {
       result = sub_mantisses(*dec1, *dec2);
     } else if (dec1->sign && !dec2->sign) {
