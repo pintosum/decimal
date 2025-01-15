@@ -18,7 +18,7 @@ void swap_ptr(void **ptr1, void **ptr2) {
   *ptr2 = temp;
 }
 
-int level_decimals(s21_decimal *value1, s21_decimal *value2) {
+int level_decimals(s21_decimal *value1, s21_decimal *value2, int *last_digit) {
   dec_map *val_big = (dec_map *)value1;
   dec_map *val_sml = (dec_map *)value2;
   int exp_diff = val_sml->exp - val_big->exp;
@@ -27,16 +27,20 @@ int level_decimals(s21_decimal *value1, s21_decimal *value2) {
     swap_ptr((void **)&val_big, (void **)&val_sml);
     exp_diff = -exp_diff;
   }
+
+  printf("\nval1 : %u\nval2 : %u\n\n", val_big->mantissa[0], val_sml->mantissa[0]);
   printf("exp_diff: %d\n", exp_diff);
-  int len = len_of_number(*val_sml);
+  int len = len_of_number(*val_big);
   printf("len: %d\n", len);
-  // if (30 - len < exp_diff) {
-  //   exp_diff = exp_diff - 30 + len;
-  // }
+  if (30 - len < exp_diff) {
+    exp_diff = exp_diff - 30 + len;
+    while(30 - val_big->exp--)
+      *val_big = div_by_ten(val_big, last_digit);
+  }
   printf("exp_diff: %d\n", exp_diff);
-  *val_sml = mult_by_pow_of_ten(val_sml, exp_diff);
+  *val_big = mult_by_pow_of_ten(val_big, exp_diff);
   puts("h");
-  print_bytes(value1);
+  print_bytes(value2);
   return val_big->exp + exp_diff;
 }
 
@@ -97,9 +101,9 @@ int main() {
   // print_bytes((s21_decimal *)&m);
 
   s21_decimal f = {0x1, 0, 0, (1 << 16) + (1 << 31)};
-  s21_decimal s = {1, 0, 0, 0};
+  s21_decimal s = {0xFFFFFFFF, 0, 0, 0};
   s21_decimal result;
-  int ret = s21_add(s, f, &result);
+  int ret = s21_add(f, s, &result);
   // print_bytes(&result);
   print_bytes(&result);
 }

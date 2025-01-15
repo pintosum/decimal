@@ -146,7 +146,7 @@ int divisible_by_ten(dec_map value) {
   return divisible;
 }
 
-dec_map div_by_ten(dec_map *value) {
+dec_map div_by_ten(dec_map *value, int *remainder) {
   dec_map q, r;
   q = add_mantisses(shift_mantissa_right(value, 1),
                     shift_mantissa_right(value, 2));
@@ -161,10 +161,20 @@ dec_map div_by_ten(dec_map *value) {
 
   r = mult_by_pow_of_ten(&q, 1);
   r = sub_mantisses(*value, r);
+  if(remainder)
+    *remainder = r.mantissa[0];
   r = add_mantisses(r, (dec_map){6, 0, 0});
   r = shift_mantissa_right(&r, 4);
   return add_mantisses(q, r);
   // return q;
+}
+
+dec_map div_by_ten_simple(dec_map value, int *remainder){
+  for(int i = 0; i < 3; i++){
+    uint64_t lol = value.mantissa[2-i];
+    lol /= 10;
+  }
+  return value;
 }
 
 dec_map normalize_decimal(dec_map value) {
