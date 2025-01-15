@@ -68,11 +68,14 @@ int s21_add(s21_decimal val1, s21_decimal val2, s21_decimal *res) {
     }
   }
   result = normalize_decimal(result);
-  if (s21_valid_dec_map(&result)) {
+  int valid = s21_valid_dec_map(&result);
+  if (valid) {
     *res = *(s21_decimal *)(&result);
   } else if (result.exp > 28 || result.zero_bytes) {
     ret = 1 + result.sign;
+    puts("arith error");
   } else {
+    puts("arith error");
     ret = 4;
   }
   return ret;
@@ -89,8 +92,8 @@ int main() {
 
   // print_bytes((s21_decimal *)&m);
 
-  s21_decimal f = {0x1, 0, 0, (1 << 16) + (1 << 31)};
-  s21_decimal s = {0xFFFFFFFF, 0, 0, 0};
+  s21_decimal f = {2, 0, 0, 0<<31};
+  s21_decimal s = {0xFFFFFFFE, 0xFFFFFFFF, 0xFFFFFFFF, 0};
   s21_decimal result;
   int ret = s21_add(f, s, &result);
   // print_bytes(&result);
