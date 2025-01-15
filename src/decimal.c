@@ -29,8 +29,8 @@ int level_decimals(s21_decimal *value1, s21_decimal *value2, int *last_digit) {
   int len = len_of_number(*val_big);
   if (30 - len < exp_diff) {
     exp_diff = exp_diff - 30 + len;
-    while(30 - val_sml->exp--)
-      *val_sml= div_by_ten(val_big, last_digit);
+    while (30 - val_sml->exp--)
+      *val_sml = div_by_ten(val_big, last_digit);
   }
   *val_big = mult_by_pow_of_ten(val_big, exp_diff);
   return val_big->exp + exp_diff;
@@ -62,20 +62,18 @@ int s21_add(s21_decimal val1, s21_decimal val2, s21_decimal *res) {
       result = add_mantisses(*dec1, *dec2);
     }
     result.exp = exp;
-  } else {
-    ret = 4;
-    if (res) {
+    print_bytes((s21_decimal *)&result);
+    result = normalize_decimal(result);
+    int valid = s21_valid_dec_map(&result);
+    if (valid) {
+      *res = *(s21_decimal *)(&result);
+    } else if (result.exp > 28 || result.zero_bytes) {
+      ret = 1 + result.sign;
+    } else {
+      ret = 4;
     }
-  }
-  result = normalize_decimal(result);
-  int valid = s21_valid_dec_map(&result);
-  if (valid) {
-    *res = *(s21_decimal *)(&result);
-  } else if (result.exp > 28 || result.zero_bytes) {
-    ret = 1 + result.sign;
-    puts("arith error");
+
   } else {
-    puts("arith error");
     ret = 4;
   }
   return ret;
@@ -92,10 +90,10 @@ int main() {
 
   // print_bytes((s21_decimal *)&m);
 
-  s21_decimal f = {2, 0, 0, 0<<31};
-  s21_decimal s = {0xFFFFFFFE, 0xFFFFFFFF, 0xFFFFFFFF, 0};
+  s21_decimal f = {2, 0, 0, 1 << 31};
+  s21_decimal s = {0xFFFFFFFE, 0xFFFFFFFF, 0xFFFFFFFF, 0 << 31};
   s21_decimal result;
   int ret = s21_add(f, s, &result);
-  // print_bytes(&result);
+  printf("ret : %d\n", ret);
   print_bytes(&result);
 }

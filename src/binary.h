@@ -35,5 +35,6 @@ dec_map normalize_decimal(dec_map value);
 int most_significant_bit(dec_map value);
 int len_of_number(dec_map value);
 int s21_valid_dec_map(dec_map *val);
+void print_dec(dec_map, char*);
 
 #endif
