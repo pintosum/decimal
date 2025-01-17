@@ -1,4 +1,5 @@
 #include "binary.h"
+#include "decimal.h"
 
 #include <stdint.h>
 #include <stdio.h>
@@ -169,6 +170,24 @@ dec_map div_by_ten(dec_map *value, int *remainder) {
   // return q;
 }
 
+dec_map div_mantisses(dec_map num, dec_map div, dec_map *remainder){
+  dec_map quot = {0};
+  dec_map rem = {0};
+  for(int i = most_significant_bit(num); i >=0; i--){
+    rem = shift_mantissa_left(&rem, 1);
+    if(num.mantissa[0] & 1){
+      quot.mantissa[0] |= 1U;
+    }
+    else{
+      quot.mantissa[0] &= ~(1U);
+    }
+    if(rem >= div){
+      rem -= div;
+      quot.mantissa[0] |= 1U;
+    }
+
+  }
+}
 
 dec_map normalize_decimal(dec_map value) {
   while (value.exp && divisible_by_ten(value)) {

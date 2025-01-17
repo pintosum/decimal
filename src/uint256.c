@@ -96,6 +96,14 @@ uint256 uint256_from_decimal(s21_decimal a) {
   return ret;
 }
 
-s21_decimal s21_decimal_from_uint256(uint256 a);
-
-uint256 uint256_mult(uint256 a, uint256 b);
+uint256 uint256_mult(uint256 a, uint256 b){
+  uint256 ret = {0};
+  while(!uint256_is_zero(b)){
+    if(b.bits[0] & 1){
+      uint256_add(a, ret);
+    }
+    shift_uint256_right(b, 1);
+    shift_uint256_left(a, 1);
+  }
+  return ret;
+}
