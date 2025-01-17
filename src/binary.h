@@ -3,8 +3,6 @@
 
 #include <stdint.h>
 
-#define OVERFLOW 0x02
-
 typedef struct {
   uint32_t mantissa[3];
   uint32_t zero_bytes : 16;
@@ -36,5 +34,6 @@ int most_significant_bit(dec_map value);
 int len_of_number(dec_map value);
 int s21_valid_dec_map(dec_map *val);
 void print_dec(dec_map, char*);
+
 
 #endif

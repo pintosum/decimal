@@ -3,6 +3,7 @@
 #include <stdio.h>
 
 #include "binary.h"
+#include "bigdecimal.h"
 
 void print_bytes(s21_decimal *value) {
   unsigned char *byte = (unsigned char *)value;

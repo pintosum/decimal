@@ -4,7 +4,7 @@
 #include <stdint.h>
 
 typedef struct {
-  int32_t bits[4];
+  uint32_t bits[4];
   // or int
 } s21_decimal;
 

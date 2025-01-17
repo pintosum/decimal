@@ -169,13 +169,6 @@ dec_map div_by_ten(dec_map *value, int *remainder) {
   // return q;
 }
 
-dec_map div_by_ten_simple(dec_map value, int *remainder){
-  for(int i = 0; i < 3; i++){
-    uint64_t lol = value.mantissa[2-i];
-    lol /= 10;
-  }
-  return value;
-}
 
 dec_map normalize_decimal(dec_map value) {
   while (value.exp && divisible_by_ten(value)) {
@@ -188,6 +181,8 @@ dec_map normalize_decimal(dec_map value) {
 int s21_valid_dec_map(dec_map *val) {
   return val->exp <= 28 && !val->signal_bits && !val->zero_bytes;
 }
+
+
 
 // int main() {
 //   dec_map f = {{0xA, 0, 0}};
