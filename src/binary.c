@@ -1,8 +1,9 @@
 #include "binary.h"
-#include "decimal.h"
 
 #include <stdint.h>
 #include <stdio.h>
+
+#include "decimal.h"
 
 void print_dec(dec_map r, char *name) {
   printf("%s : %u %u %u  %u\n", name, r.mantissa[0], r.mantissa[1],
@@ -147,30 +148,18 @@ int divisible_by_ten(dec_map value) {
   return divisible;
 }
 
-dec_map div_by_ten(dec_map *value, int *remainder) {
-  dec_map q, r;
-  q = add_mantisses(shift_mantissa_right(value, 1),
-                    shift_mantissa_right(value, 2));
-  q = add_mantisses(q, shift_mantissa_right(&q, 4));
-  q = add_mantisses(q, shift_mantissa_right(&q, 8));
-  q = add_mantisses(q, shift_mantissa_right(&q, 16));
-  q = add_mantisses(q, shift_mantissa_right(&q, 32));
-  q = add_mantisses(q, shift_mantissa_right(&q, 64));
-  q = shift_mantissa_right(&q, 3);
-
-  // print_dec(q, "q");
-
-  r = mult_by_pow_of_ten(&q, 1);
-  r = sub_mantisses(*value, r);
-  if(remainder)
-    *remainder = r.mantissa[0];
-  r = add_mantisses(r, (dec_map){6, 0, 0});
-  r = shift_mantissa_right(&r, 4);
-  return add_mantisses(q, r);
-  // return q;
+dec_map div_by_ten(dec_map value, int *remainder) {
+  uint64_t rem = 0;
+  for (int i = 2; i >= 0; i--) {
+    uint64_t digit = (uint64_t)value.mantissa[i] + rem * (1ULL << 32);
+    value.mantissa[i] = digit / 10;
+    rem = digit % 10;
+  }
+  if (remainder) *remainder = rem;
+  return value;
 }
 
-dec_map div_mantisses(dec_map num, dec_map div, dec_map *remainder){
+/*dec_map div_mantisses(dec_map num, dec_map div, dec_map *remainder){
   dec_map quot = {0};
   dec_map rem = {0};
   for(int i = most_significant_bit(num); i >=0; i--){
@@ -187,11 +176,11 @@ dec_map div_mantisses(dec_map num, dec_map div, dec_map *remainder){
     }
 
   }
-}
+}*/
 
 dec_map normalize_decimal(dec_map value) {
   while (value.exp && divisible_by_ten(value)) {
-    value = div_by_ten(&value, NULL);
+    value = div_by_ten(value, NULL);
     value.exp--;
   }
   return value;
@@ -201,16 +190,12 @@ int s21_valid_dec_map(dec_map *val) {
   return val->exp <= 28 && !val->signal_bits && !val->zero_bytes;
 }
 
+int main() {
+  dec_map f = {{0x0000A768, 0xb9873ad3, 0x8f2ab2}};
+  // dec_map l = {{0xF, 0, 0}};
+  // // dec_map s = div_by_ten(&l);
+  // dec_map sub = sub_mantisses(f, l);
+  // print_dec(sub, "diff");
 
-
-// int main() {
-//   dec_map f = {{0xA, 0, 0}};
-//   dec_map l = {{0xF, 0, 0}};
-//   print_dec(l, "l");
-
-//   // dec_map s = div_by_ten(&l);
-//   dec_map sub = sub_mantisses(f, l);
-//   print_dec(sub, "diff");
-
-//   // printf("%u %u  %u\n", f.mantissa[0], f.mantissa[1], f.zero_bytes);
-// }
+  // printf("%u %u  %u\n", f.mantissa[0], f.mantissa[1], f.zero_bytes);
+}

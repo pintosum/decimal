@@ -27,13 +27,12 @@ dec_map sub_mantisses(dec_map val1, dec_map val2);
 
 dec_map mult_by_pow_of_ten(dec_map *value, int power);
 
-dec_map div_by_ten(dec_map *value, int *remainder);
+dec_map div_by_ten(dec_map value, int *remainder);
 dec_map normalize_decimal(dec_map value);
 
 int most_significant_bit(dec_map value);
 int len_of_number(dec_map value);
 int s21_valid_dec_map(dec_map *val);
-void print_dec(dec_map, char*);
-
+void print_dec(dec_map, char *);
 
 #endif
