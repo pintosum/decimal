@@ -1,5 +1,6 @@
 #include "decimal.h"
 
+#include "uint256.h"
 #include <stdio.h>
 
 #include "binary.h"
@@ -30,7 +31,7 @@ int level_decimals(s21_decimal *value1, s21_decimal *value2, int *last_digit) {
   if (30 - len < exp_diff) {
     exp_diff = exp_diff - 30 + len;
     while (30 - val_sml->exp--)
-      *val_sml = div_by_ten(val_big, last_digit);
+      *val_sml = div_by_ten(*val_big, last_digit);
   }
   *val_big = mult_by_pow_of_ten(val_big, exp_diff);
   return val_big->exp + exp_diff;
@@ -47,7 +48,7 @@ int s21_add(s21_decimal val1, s21_decimal val2, s21_decimal *res) {
   int ret = 0;
   dec_map *dec1 = (dec_map *)&val1;
   dec_map *dec2 = (dec_map *)&val2;
-  dec_map result;
+  dec_map result = {0};
 
   if (res && s21_valid_decimal(&val1) && s21_valid_decimal(&val2)) {
     uint32_t exp = level_decimals(&val1, &val2, NULL);
@@ -79,6 +80,36 @@ int s21_add(s21_decimal val1, s21_decimal val2, s21_decimal *res) {
   return ret;
 }
 
+s21_decimal s21_mul_handle(s21_decimal a, s21_decimal b, int scale_diff) {
+  s21_decimal ret = {0};
+  uint256 val1 = uint256_from_decimal(a);
+  uint256 val2 = uint256_from_decimal(b);
+  if (scale_diff > 0) {
+    val2 = uint256_mult_by_pow_of_ten(val2, scale_diff);
+  } else {
+    val1 = uint256_mult_by_pow_of_ten(val1, -scale_diff);
+  }
+  uint256 result = uint256_mult(val1, val2);
+  ret = s21_decimal_from_uint256(result);
+  return ret;
+}
+
+int s21_mul(s21_decimal val1, s21_decimal val2, s21_decimal *res) {
+  int ret = 0;
+  dec_map *dec1 = (dec_map *)&val1;
+  dec_map *dec2 = (dec_map *)&val2;
+  dec_map *result = (dec_map *)res;
+
+  if (res && s21_valid_decimal(&val1) && s21_valid_decimal(&val2)) {
+    *res = s21_mul_handle(val1, val2, dec1->exp - dec2->exp);
+    if (dec1->sign != dec2->sign) {
+      result->sign = 1;
+    } else {
+      result->sign = 0;
+    }
+  }
+  return ret;
+}
 
 int main() {
   // s21_decimal dec = {0};

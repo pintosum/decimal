@@ -2,6 +2,7 @@
 
 #include <stdio.h>
 
+// #include "binary.h"
 #include "decimal.h"
 void print_uint256(uint256 a, char *name) {
   puts(name);
@@ -64,7 +65,8 @@ uint256 shift_uint256_right(uint256 a, unsigned int shift) {
 
 int uint256_is_zero(uint256 a) {
   int ret = 1;
-  for (int i = 0; i < 4; i++) ret *= !a.bits[i];
+  for (int i = 0; i < 4; i++)
+    ret *= !a.bits[i];
   return ret;
 }
 
@@ -130,13 +132,43 @@ int uint256_divisible_by_ten(uint256 a) {
   for (int i = 0; i < 4; i++) {
     uint64_t m = min(sum, a.bits[i]);
     sum += a.bits[i];
-    if (sum < m) sum++;
+    if (sum < m)
+      sum++;
   }
   return !(sum % 5) && !(a.bits[0] % 2);
 }
 
+int uint256_most_significant_bit(uint256 value) {
+  int ret = 0;
+  while (!uint256_is_zero(value)) {
+    value = shift_uint256_right_one(value);
+    ret++;
+  }
+  return ret;
+}
+
+int len_of_uint256(uint256 value) {
+  double log_of_2 = 0.301;
+  int binary_len = uint256_most_significant_bit(value);
+  return (int)(binary_len * log_of_2) + 1;
+}
+
+s21_decimal s21_decimal_from_uint256(uint256 a) {
+  s21_decimal ret;
+  int len = len_of_uint256(a);
+  unsigned int digit = 0;
+  while (len > 29) {
+    a = uint256_divide_by_ten(a, &digit);
+    len--;
+  }
+  if(digit >= 5){
+    a = uint256_add(a, uint256_get_one());
+  }
+  return ret;
+}
+
 uint256 uint256_mult_by_pow_of_ten(uint256 ret, int power) {
-  while (power--) {
+  while (power-- > 0) {
     ret = uint256_add(shift_uint256_left(ret, 3), shift_uint256_left(ret, 1));
   }
   return ret;
@@ -164,11 +196,12 @@ uint256 uint256_divide_by_ten(uint256 value, unsigned int *remainder) {
     q = uint256_add(q, uint256_get_one());
     r.bits[0] -= 10;
   }
-  if (remainder) *remainder = r.bits[0];
+  if (remainder)
+    *remainder = r.bits[0];
   return q;
 }
 
-int main() {
+/*int main() {
   uint256 a = {{0x566553, 0x145213, 0, 0}};
   // print_uint256(a, "a");
   uint256 b = {{0x474, 0x23, 0, 0}};
@@ -188,4 +221,4 @@ int main() {
   // print_uint256(l2, "l2");
   printf("res: %lu\nrem: %u\n", res.bits[0], rem);
   printf("here :: %lu\n", 0x1FFFF1008);
-}
+}*/

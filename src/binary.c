@@ -3,7 +3,7 @@
 #include <stdint.h>
 #include <stdio.h>
 
-#include "decimal.h"
+//#include "decimal.h"
 
 void print_dec(dec_map r, char *name) {
   printf("%s : %u %u %u  %u\n", name, r.mantissa[0], r.mantissa[1],
