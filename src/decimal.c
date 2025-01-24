@@ -20,55 +20,46 @@ void swap_ptr(void **ptr1, void **ptr2) {
 }
 
 int level_decimals(s21_decimal *value1, s21_decimal *value2, int *last_digit) {
-  dec_map *val_big = (dec_map *)value1;
-  dec_map *val_sml = (dec_map *)value2;
-  int exp_diff = val_sml->exp - val_big->exp;
+  int exp_diff = value2->fields.exp - value1->fields.exp;
   if (exp_diff < 0) {
-    swap_ptr((void **)&val_big, (void **)&val_sml);
+    swap_ptr((void **)&value1, (void **)&value2);
     exp_diff = -exp_diff;
   }
-  int len = len_of_number(*val_big);
+  int len = s21_decimal_len_of_number(*value1);
   if (30 - len < exp_diff) {
     exp_diff = exp_diff - 30 + len;
-    while (30 - val_sml->exp--) *val_sml = div_by_ten(*val_big, last_digit);
+    while (30 - value2->fields.exp--) *value2 = s21_decimal_divide_by_ten(*value1, last_digit);
   }
-  *val_big = mult_by_pow_of_ten(val_big, exp_diff);
-  return val_big->exp + exp_diff;
+  *value1 = s21_decimal_mult_by_pow_of_ten(value1, exp_diff);
+  return value1->fields.exp + exp_diff;
 }
-
-int s21_valid_decimal(s21_decimal *value) {
-  dec_map *val = (dec_map *)value;
-  return val->exp <= 28 && !val->signal_bits && !val->zero_bytes;
-}
-
-int is_negative(s21_decimal val) { return val.bits[3] >> 31; }
 
 int s21_add(s21_decimal val1, s21_decimal val2, s21_decimal *res) {
   int ret = 0;
   dec_map *dec1 = (dec_map *)&val1;
   dec_map *dec2 = (dec_map *)&val2;
-  dec_map result = {0};
+  s21_decimal result = {0};
 
-  if (res && s21_valid_decimal(&val1) && s21_valid_decimal(&val2)) {
+  if (res && s21_is_valid_decimal(&val1) && s21_is_valid_decimal(&val2)) {
     uint32_t exp = level_decimals(&val1, &val2, NULL);
     print_bytes(&val1);
     print_bytes(&val2);
     if (!dec1->sign && dec2->sign) {
-      result = sub_mantisses(*dec1, *dec2);
+      result = s21_sub_mantisses(val1, val2);
     } else if (dec1->sign && !dec2->sign) {
-      result = sub_mantisses(*dec2, *dec1);
+      result = s21_sub_mantisses(val2, val1);
       // result.sign += dec2->sign;
     } else {
-      result = add_mantisses(*dec1, *dec2);
+      result = s21_add_mantisses(val1, val2);
     }
-    result.exp = exp;
-    print_bytes((s21_decimal *)&result);
-    result = normalize_decimal(result);
-    int valid = s21_valid_dec_map(&result);
+    result.fields.exp = exp;
+    print_bytes(&result);
+    result = s21_normalize_decimal(result);
+    int valid = s21_is_valid_decimal(&result);
     if (valid) {
       *res = *(s21_decimal *)(&result);
-    } else if (result.exp > 28 || result.zero_bytes) {
-      ret = 1 + result.sign;
+    } else if (result.fields.exp > 28 || result.fields.zero_bytes) {
+      ret = 1 + result.fields.sign;
     } else {
       ret = 4;
     }
@@ -95,16 +86,13 @@ s21_decimal s21_mul_handle(s21_decimal a, s21_decimal b, int scale_diff) {
 
 int s21_mul(s21_decimal val1, s21_decimal val2, s21_decimal *res) {
   int ret = 0;
-  dec_map *dec1 = (dec_map *)&val1;
-  dec_map *dec2 = (dec_map *)&val2;
-  dec_map *result = (dec_map *)res;
 
-  if (res && s21_valid_decimal(&val1) && s21_valid_decimal(&val2)) {
-    *res = s21_mul_handle(val1, val2, dec1->exp - dec2->exp);
-    if (dec1->sign != dec2->sign) {
-      result->sign = 1;
+  if (res && s21_is_valid_decimal(&val1) && s21_is_valid_decimal(&val2)) {
+    *res = s21_mul_handle(val1, val2, val1.fields.exp - val2.fields.exp);
+    if (val1.fields.sign != val2.fields.sign) {
+      res->fields.sign = 1;
     } else {
-      result->sign = 0;
+      res->fields.sign = 0;
     }
   }
   return ret;
