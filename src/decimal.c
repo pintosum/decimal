@@ -1,9 +1,9 @@
 #include "decimal.h"
 
-#include "uint256.h"
 #include <stdio.h>
 
 #include "binary.h"
+#include "uint256.h"
 
 void print_bytes(s21_decimal *value) {
   unsigned char *byte = (unsigned char *)value;
@@ -30,8 +30,7 @@ int level_decimals(s21_decimal *value1, s21_decimal *value2, int *last_digit) {
   int len = len_of_number(*val_big);
   if (30 - len < exp_diff) {
     exp_diff = exp_diff - 30 + len;
-    while (30 - val_sml->exp--)
-      *val_sml = div_by_ten(*val_big, last_digit);
+    while (30 - val_sml->exp--) *val_sml = div_by_ten(*val_big, last_digit);
   }
   *val_big = mult_by_pow_of_ten(val_big, exp_diff);
   return val_big->exp + exp_diff;
