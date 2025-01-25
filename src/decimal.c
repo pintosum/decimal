@@ -28,7 +28,8 @@ int level_decimals(s21_decimal *value1, s21_decimal *value2, int *last_digit) {
   int len = s21_decimal_len_of_number(*value1);
   if (30 - len < exp_diff) {
     exp_diff = exp_diff - 30 + len;
-    while (30 - value2->fields.exp--) *value2 = s21_decimal_divide_by_ten(*value1, last_digit);
+    while (30 - value2->fields.exp--)
+      *value2 = s21_decimal_divide_by_ten(*value1, last_digit);
   }
   *value1 = s21_decimal_mult_by_pow_of_ten(value1, exp_diff);
   return value1->fields.exp + exp_diff;
@@ -69,25 +70,30 @@ int s21_add(s21_decimal val1, s21_decimal val2, s21_decimal *res) {
 }
 
 s21_decimal s21_mul_handle(s21_decimal a, s21_decimal b) {
-  s21_decimal ret;
+  s21_decimal ret = {0};
   uint256 val1 = uint256_from_decimal(a);
   uint256 val2 = uint256_from_decimal(b);
   uint256 result = uint256_mult(val1, val2);
   ret = s21_decimal_from_uint256(result);
   ret.fields.exp += a.fields.exp + b.fields.exp;
+  ret.fields.sign = a.fields.sign != b.fields.sign ? 1 : 0;
+  ret = s21_normalize_decimal(ret);
   return ret;
 }
 
 int s21_mul(s21_decimal val1, s21_decimal val2, s21_decimal *res) {
   int ret = 0;
+  s21_decimal result = {0};
 
   if (res && s21_is_valid_decimal(&val1) && s21_is_valid_decimal(&val2)) {
-    *res = s21_mul_handle(val1, val2);
-    if (val1.fields.sign != val2.fields.sign) {
-      res->fields.sign = 1;
+    result = s21_mul_handle(val1, val2);
+    if (s21_is_valid_decimal(&result)) {
+      *res = result;
     } else {
-      res->fields.sign = 0;
+      ret = 1 + result.fields.sign;
     }
+  } else {
+    ret = 4;
   }
   return ret;
 }
@@ -103,9 +109,10 @@ int main() {
 
   // print_bytes((s21_decimal *)&m);
 
-  s21_decimal f = {21, 0, 0, 1 << 16};
-  s21_decimal s = {12344, 0x0, 0x0, 5 << 16};
-  s21_decimal result;
+  s21_decimal f = {0x21ffffff, 0xaf24ffff, 0, 1 << 16};
+  s21_decimal s = {0x12344fff, 0xffff323f, 0xff, 5 << 16};
+  s.fields.sign = 1;
+  s21_decimal result = {0};
   int ret = s21_mul(f, s, &result);
   printf("ret : %d\n", ret);
   print_bytes(&result);

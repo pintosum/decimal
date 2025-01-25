@@ -191,13 +191,9 @@ uint256 uint256_divide_by_ten(uint256 value, unsigned int *remainder) {
   q = uint256_add(q, shift_uint256_right(q, 64));
   q = uint256_add(q, shift_uint256_right(q, 128));
   q = shift_uint256_right(q, 3);
-  print_uint256(q, "q");
 
   r = uint256_mult_by_pow_of_ten(q, 1);
-  print_uint256(r, "q mult 10");
   r = uint256_sub(value, r);
-  print_uint256(value, "value");
-  print_uint256(r, "r");
 
   if (r.bits[0] > 9) {
     q = uint256_add(q, uint256_get_one());
