@@ -36,17 +36,15 @@ int level_decimals(s21_decimal *value1, s21_decimal *value2, int *last_digit) {
 
 int s21_add(s21_decimal val1, s21_decimal val2, s21_decimal *res) {
   int ret = 0;
-  dec_map *dec1 = (dec_map *)&val1;
-  dec_map *dec2 = (dec_map *)&val2;
   s21_decimal result = {0};
 
   if (res && s21_is_valid_decimal(&val1) && s21_is_valid_decimal(&val2)) {
     uint32_t exp = level_decimals(&val1, &val2, NULL);
     print_bytes(&val1);
     print_bytes(&val2);
-    if (!dec1->sign && dec2->sign) {
+    if (!val1.fields.sign && val1.fields.sign) {
       result = s21_sub_mantisses(val1, val2);
-    } else if (dec1->sign && !dec2->sign) {
+    } else if (val1.fields.sign && !val2.fields.sign) {
       result = s21_sub_mantisses(val2, val1);
       // result.sign += dec2->sign;
     } else {
@@ -57,7 +55,7 @@ int s21_add(s21_decimal val1, s21_decimal val2, s21_decimal *res) {
     result = s21_normalize_decimal(result);
     int valid = s21_is_valid_decimal(&result);
     if (valid) {
-      *res = *(s21_decimal *)(&result);
+      *res = result;
     } else if (result.fields.exp > 28 || result.fields.zero_bytes) {
       ret = 1 + result.fields.sign;
     } else {
@@ -70,17 +68,13 @@ int s21_add(s21_decimal val1, s21_decimal val2, s21_decimal *res) {
   return ret;
 }
 
-s21_decimal s21_mul_handle(s21_decimal a, s21_decimal b, int scale_diff) {
-  s21_decimal ret = {0};
+s21_decimal s21_mul_handle(s21_decimal a, s21_decimal b) {
+  s21_decimal ret;
   uint256 val1 = uint256_from_decimal(a);
   uint256 val2 = uint256_from_decimal(b);
-  if (scale_diff > 0) {
-    val2 = uint256_mult_by_pow_of_ten(val2, scale_diff);
-  } else {
-    val1 = uint256_mult_by_pow_of_ten(val1, -scale_diff);
-  }
   uint256 result = uint256_mult(val1, val2);
   ret = s21_decimal_from_uint256(result);
+  ret.fields.exp += a.fields.exp + b.fields.exp;
   return ret;
 }
 
@@ -88,7 +82,7 @@ int s21_mul(s21_decimal val1, s21_decimal val2, s21_decimal *res) {
   int ret = 0;
 
   if (res && s21_is_valid_decimal(&val1) && s21_is_valid_decimal(&val2)) {
-    *res = s21_mul_handle(val1, val2, val1.fields.exp - val2.fields.exp);
+    *res = s21_mul_handle(val1, val2);
     if (val1.fields.sign != val2.fields.sign) {
       res->fields.sign = 1;
     } else {
@@ -109,10 +103,10 @@ int main() {
 
   // print_bytes((s21_decimal *)&m);
 
-  s21_decimal f = {2, 0, 0, 1 << 31};
-  s21_decimal s = {0xFFFFFFFE, 0xFFFFFFFF, 0xFFFFFFFF, 0 << 31};
+  s21_decimal f = {21, 0, 0, 1 << 16};
+  s21_decimal s = {12344, 0x0, 0x0, 5 << 16};
   s21_decimal result;
-  int ret = s21_add(f, s, &result);
+  int ret = s21_mul(f, s, &result);
   printf("ret : %d\n", ret);
   print_bytes(&result);
 }

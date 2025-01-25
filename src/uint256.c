@@ -154,13 +154,20 @@ int len_of_uint256(uint256 value) {
 }
 
 s21_decimal s21_decimal_from_uint256(uint256 a) {
-  s21_decimal ret;
+  s21_decimal ret = {0};
   int len = len_of_uint256(a);
   unsigned int digit = 0;
   while (len > 29) {
     a = uint256_divide_by_ten(a, &digit);
     len--;
+    ret.fields.exp--;
   }
+
+  ret.bits[0] = a.bits[0] & 0xFFFFFFFF;
+  ret.bits[1] = a.bits[0] & 0xFFFFFFFF00000000;
+  ret.bits[2] = a.bits[1] & 0xFFFFFFFF;
+
+  // printf("exp : %u\nlen : %d\n", ret.fields.exp, len);
   if(digit >= 5){
     a = uint256_add(a, uint256_get_one());
   }

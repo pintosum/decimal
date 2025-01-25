@@ -5,13 +5,13 @@
 
 #include "decimal.h"
 
-typedef struct {
+/*typedef struct {
   uint32_t mantissa[3];
   uint32_t zero_bytes : 16;
   uint32_t exp : 8;
   uint32_t signal_bits : 7;
   uint32_t sign : 1;
-} dec_map;
+} dec_map;*/
 
 s21_decimal s21_shift_mantissa_left_one(s21_decimal);
 s21_decimal s21_shift_mantissa_right_one(s21_decimal);
