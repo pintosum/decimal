@@ -5,13 +5,6 @@
 
 #include "decimal.h"
 
-/*typedef struct {
-  uint32_t mantissa[3];
-  uint32_t zero_bytes : 16;
-  uint32_t exp : 8;
-  uint32_t signal_bits : 7;
-  uint32_t sign : 1;
-} dec_map;*/
 
 s21_decimal s21_shift_mantissa_left_one(s21_decimal);
 s21_decimal s21_shift_mantissa_right_one(s21_decimal);
@@ -36,6 +29,7 @@ s21_decimal s21_normalize_decimal(s21_decimal);
 int s21_decimal_most_significant_bit(s21_decimal);
 int s21_decimal_len_of_number(s21_decimal);
 int s21_is_valid_decimal(s21_decimal *);
+int level_decimals(s21_decimal *, s21_decimal *, int *);
 
 void print_dec(s21_decimal, char *);
 void print_s21_decimal(s21_decimal, char *);

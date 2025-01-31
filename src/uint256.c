@@ -1,19 +1,8 @@
 #include "uint256.h"
 
-#include <stdio.h>
-
-// #include "binary.h"
 #include "decimal.h"
 #define sizeofarray(a) (sizeof(a) / sizeof(a[0]))
 
-void print_uint256(uint256 a, char *name) {
-  puts(name);
-  unsigned char *byte = (unsigned char *)&a;
-  for (int i = sizeof(uint256) - 1; i >= 0; i--) {
-    printf("%.2x ", *(byte + i));
-  }
-  puts("");
-}
 
 uint256 uint256_and(uint256 a, uint256 b) {
   for (int i = 0; i < sizeofarray(a.bits); i++) {
@@ -169,7 +158,6 @@ s21_decimal s21_decimal_from_uint256(uint256 a) {
   ret.bits[1] = a.bits[0] & 0xFFFFFFFF00000000;
   ret.bits[2] = a.bits[1] & 0xFFFFFFFF;
 
-  // printf("exp : %u\nlen : %d\n", ret.fields.exp, len);
   if(digit >= 5){
     a = uint256_add(a, uint256_get_one());
   }
@@ -206,25 +194,3 @@ uint256 uint256_divide_by_ten(uint256 value, unsigned int *remainder) {
   return q;
 }
 
-/*int main() {
-  uint256 a = {{0x566553, 0x145213, 0, 0}};
-  // print_uint256(a, "a");
-  uint256 b = {{0x474, 0x23, 0, 0}};
-  // print_uint256(b, "b");
-  int arr[10] = {0};
-  printf("%lu\n", sizeofarray(a.bits));
-  shift_uint256_left(a, 1);
-  uint256_add(a, b);
-  // print_uint256(uint256_mult(a, b), "res");
-
-  uint64_t l = 0xFFFFFFFFFFFFFFFF;
-  printf("l  : %lu\n", l);
-  uint256 l2 = {{l, 0x43123fdc, 0xdaf, 0x1238760}};
-  unsigned int rem = 0;
-  uint256 res = uint256_divide_by_ten(l2, &rem);
-  // print_uint256(uint256_divide_by_ten(l2, NULL), "div");
-  // printf("l2 : %lu\n", l2.bits[0]);
-  // print_uint256(l2, "l2");
-  printf("res: %lu\nrem: %u\n", res.bits[0], rem);
-  printf("here :: %lu\n", 0x1FFFF1008);
-}*/

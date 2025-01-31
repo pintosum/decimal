@@ -5,20 +5,42 @@
 #include <string.h>
 
 #include "decimal.h"
+void swap_ptr(void **ptr1, void **ptr2) {
+  void *temp = *ptr1;
+  *ptr1 = *ptr2;
+  *ptr2 = temp;
+}
+
+int level_decimals(s21_decimal *value1, s21_decimal *value2, int *last_digit) {
+  int exp_diff = value2->fields.exp - value1->fields.exp;
+  if (exp_diff < 0) {
+    swap_ptr((void **)&value1, (void **)&value2);
+    exp_diff = -exp_diff;
+  }
+  int len = s21_decimal_len_of_number(*value1);
+  if (30 - len < exp_diff) {
+    exp_diff = exp_diff - 30 + len;
+    while (30 - value2->fields.exp-- > 0)
+      *value2 = s21_decimal_divide_by_ten(*value1, last_digit);
+  }
+  *value1 = s21_decimal_mult_by_pow_of_ten(value1, exp_diff);
+  value1->fields.exp += exp_diff;
+  return 1;
+}
 
 s21_decimal s21_decimal_from_string(const char *dec) {
   s21_decimal ret = {0};
   int len = strlen(dec);
   int i = 0;
-  if(dec[0] == '-'){
+  if (dec[0] == '-') {
     ret.fields.sign = 1;
     i++;
   }
   int max_len = 29;
   while (i < len) {
-    if(i == max_len)
+    if (i == max_len)
       break;
-    if(s21_decimal_is_zero(&ret)){
+    if (s21_decimal_is_zero(&ret)) {
       max_len++;
     }
 
@@ -28,12 +50,11 @@ s21_decimal s21_decimal_from_string(const char *dec) {
     } else if (dec[i] == '.') {
       ret.fields.exp = len < max_len ? len - ++i : max_len - ++i;
       continue;
-    }
-    else{
+    } else {
       return (s21_decimal){0};
     }
     s21_decimal n = s21_decimal_mult_by_pow_of_ten(&ret, 1);
-    s21_decimal dig = {digit, 0, 0, 0};
+    s21_decimal dig = {{digit, 0, 0, 0}};
     ret = s21_add_mantisses(n, dig);
   }
   return ret;
@@ -77,8 +98,6 @@ void print_dec(s21_decimal r, char *name) {
 }
 
 s21_decimal s21_shift_mantissa_left_one(s21_decimal value) {
-  // int overflowing = value->zero_bytes >> 6 & 1;
-  // if (!overflowing) {
   s21_decimal val = value;
   int carry = 0;
   for (int i = 0; i < 3; i++) {
@@ -89,8 +108,6 @@ s21_decimal s21_shift_mantissa_left_one(s21_decimal value) {
 
   val.fields.zero_bytes = value.fields.zero_bytes << 1;
   val.fields.zero_bytes |= carry;
-  //} else
-  // value.fields.signal_bits |= OVERFLOW;
 
   return val;
 }
@@ -161,7 +178,6 @@ int s21_decimal_is_zero(s21_decimal *value) {
 
 s21_decimal s21_add_mantisses(s21_decimal val1, s21_decimal val2) {
   s21_decimal ret = val1;
-  // ret.sign = 0;
   while (!s21_decimal_is_zero(&val2)) {
     s21_decimal carry_bits = s21_decimal_and(&ret, &val2);
     carry_bits = s21_shift_mantissa_left_one(carry_bits);
@@ -176,7 +192,7 @@ s21_decimal s21_sub_mantisses(s21_decimal val1, s21_decimal val2) {
   val2 = s21_add_mantisses(val1, val2);
   if (val2.fields.zero_bytes == 0xFFFF) {
     val2 = s21_decimal_twos_complement(val2);
-    val2.fields.sign = 1;
+    val2.fields.sign = 0;
   }
   return val2;
 }
@@ -196,7 +212,6 @@ int s21_decimal_most_significant_bit(s21_decimal value) {
     value = s21_shift_mantissa_right_one(value);
     ret++;
   }
-  // printf("signif_bit: %d\n\n", ret);
   return ret;
 }
 
@@ -233,14 +248,14 @@ s21_decimal s21_decimal_set_bit(s21_decimal a, unsigned int bit) {
   return a;
 }
 
-int s21_is_greater_or_equal(s21_decimal a, s21_decimal b) {
+/*int s21_is_greater_or_equal(s21_decimal a, s21_decimal b) {
   a.bits[3] = a.fields.zero_bytes;
   b.bits[3] = b.fields.zero_bytes;
   int f = s21_decimal_most_significant_bit(a) / 32;
   int s = s21_decimal_most_significant_bit(b) / 32;
   f = f > s ? f : s;
   return a.bits[f] >= b.bits[f];
-}
+}*/
 
 unsigned int s21_decimal_get_bit(s21_decimal a, unsigned int bit) {
   unsigned int i = bit / 32;
@@ -279,25 +294,3 @@ int s21_is_valid_decimal(s21_decimal *val) {
   return val->fields.exp <= 28 && !val->fields.signal_bits &&
          !val->fields.zero_bytes;
 }
-
-/*int main() {
-  s21_decimal f = {{0x0000A768, 0xb9873ad3, 0x8f2ab2}};
-  s21_decimal n = {{0xed92da20, 0xd74ec4fd, 0x43fb3bf, 0x0}};
-  s21_decimal pow2 = {{0, 1, 0, 0}};
-  s21_decimal four = {{4, 0, 0, 0}};
-  s21_decimal div = {{0xe1e3d0d8, 0xde3cbe4e, 0xb3e0, 0x0}};
-  s21_decimal p = {{1, 0, 0, 0}};
-  s21_decimal l = {{2, 0, 0, 0}};
-  s21_decimal rem = {0};
-  //s21_decimal result = s21_div_mantisses(pow2, four, &rem);
-  s21_decimal result = s21_div_mantisses(p, l, &rem);
-  print_dec(result, "\nresult");
-  print_dec(rem, "rem");
-
-  // s21_decimal l = {{0xF, 0, 0}};
-  // // s21_decimal s = div_by_ten(&l);
-  // s21_decimal sub = sub_mantisses(f, l);
-  // print_dec(sub, "diff");
-
-  // printf("%u %u  %u\n", f.mantissa[0], f.mantissa[1], f.zero_bytes);
-}*/

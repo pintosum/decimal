@@ -5,39 +5,6 @@
 #include "binary.h"
 #include "uint256.h"
 
-void print_bytes(s21_decimal *value) {
-  unsigned char *byte = (unsigned char *)value;
-  for (int i = sizeof(s21_decimal) - 1; i >= 0; i--) {
-    printf("%.2x ", *(byte + i));
-    if (i % 4 == 0) {
-      printf(" ");
-    }
-  }
-  printf("\n");
-}
-
-void swap_ptr(void **ptr1, void **ptr2) {
-  void *temp = *ptr1;
-  *ptr1 = *ptr2;
-  *ptr2 = temp;
-}
-
-int level_decimals(s21_decimal *value1, s21_decimal *value2, int *last_digit) {
-  int exp_diff = value2->fields.exp - value1->fields.exp;
-  if (exp_diff < 0) {
-    swap_ptr((void **)&value1, (void **)&value2);
-    exp_diff = -exp_diff;
-  }
-  int len = s21_decimal_len_of_number(*value1);
-  if (30 - len < exp_diff) {
-    exp_diff = exp_diff - 30 + len;
-    while (30 - value2->fields.exp--)
-      *value2 = s21_decimal_divide_by_ten(*value1, last_digit);
-  }
-  *value1 = s21_decimal_mult_by_pow_of_ten(value1, exp_diff);
-  value1->fields.exp += exp_diff;
-  return 1;
-}
 
 int s21_sub(s21_decimal val1, s21_decimal val2, s21_decimal *res) {
   int ret = 0;
@@ -47,17 +14,16 @@ int s21_sub(s21_decimal val1, s21_decimal val2, s21_decimal *res) {
     uint32_t exp = level_decimals(&val1, &val2, NULL);
     if (!val1.fields.sign && val2.fields.sign) {
       result = s21_add_mantisses(val1, val2);
-      result.fields.sign += val2.fields.sign;
+      result.fields.sign = val1.fields.sign;
     } else if (val1.fields.sign && !val2.fields.sign) {
       result = s21_add_mantisses(val2, val1);
-      result.fields.sign += val2.fields.sign;
+      result.fields.sign = val1.fields.sign;
     } else {
       result = s21_sub_mantisses(val1, val2);
     }
-    // result.fields.exp = exp;
-    //  print_bytes(&result);
     result = s21_normalize_decimal(result);
     int valid = s21_is_valid_decimal(&result);
+
     if (valid) {
       *res = result;
     } else if (result.fields.exp > 28 || result.fields.zero_bytes) {
@@ -78,20 +44,13 @@ int s21_add(s21_decimal val1, s21_decimal val2, s21_decimal *res) {
 
   if (res && s21_is_valid_decimal(&val1) && s21_is_valid_decimal(&val2)) {
     uint32_t exp = level_decimals(&val1, &val2, NULL);
-    /*   puts("val1");
-       print_bytes(&val1);
-       puts("val2");
-       print_bytes(&val2);*/
     if (!val1.fields.sign && val2.fields.sign) {
       result = s21_sub_mantisses(val1, val2);
     } else if (val1.fields.sign && !val2.fields.sign) {
       result = s21_sub_mantisses(val2, val1);
-      // result.sign += dec2->sign;
     } else {
       result = s21_add_mantisses(val1, val2);
     }
-    // result.fields.exp = exp;
-    //  print_bytes(&result);
     result = s21_normalize_decimal(result);
     int valid = s21_is_valid_decimal(&result);
     if (valid) {
@@ -157,27 +116,25 @@ int s21_div(s21_decimal a, s21_decimal b, s21_decimal *res) {
     } while (!s21_decimal_is_zero(&rem) &&
              s21_decimal_len_of_number(result) < 29);
     ret = 0;
-    if (s21_is_valid_decimal(&result)){
+    if (s21_is_valid_decimal(&result)) {
       *res = result;
-      print_bytes(&result);
-    }
-    else
+    } else
       ret = 1;
   }
   return ret;
 }
 
-int main() {
-  s21_decimal a = s21_decimal_from_string("7938773298743");
-  s21_decimal b = s21_decimal_from_string("0.00000000001");
+/*int main() {
+  s21_decimal a = s21_decimal_from_string("-11111111111111111111111111");
+  s21_decimal b = s21_decimal_from_string("-111111111111111111111111111");
   printf("a sign : %d\n", a.fields.sign);
   printf("r sign : %d\n", b.fields.sign);
   s21_decimal result = {0};
-  int ret = s21_div(a, b, &result);
+  int ret = s21_sub(a, b, &result);
   printf("ret : %d\n", ret);
 
   print_s21_decimal(a, "a");
   print_s21_decimal(b, "b");
-  result = s21_decimal_from_string("0");
   print_s21_decimal(result, "result");
-}
+  print_dec(result, "ints");
+}*/

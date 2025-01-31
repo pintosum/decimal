@@ -1,7 +1,18 @@
 #ifndef S21_DECIMAL_H
 #define S21_DECIMAL_H
 
+#include <limits.h>
 #include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h> // Для memset
+#define MAX INT_MAX
+#define MIN INT_MIN
+#define S21_POSITIVE_INF 1.0 / 0.0
+
+typedef enum { CONVERT_OK, CONVERT_ERROR } conversion_result;
+
+enum { BEGIN_POWER = 16, END_POWER = 23, SIGN = 31 };
 
 typedef union {
   uint32_t bits[4];
@@ -50,10 +61,10 @@ int s21_is_not_equal(s21_decimal, s21_decimal);
  *      0 - OK
  *      1 - convertation error
  * */
-int s21_from_int_to_decimal(int, s21_decimal);
-int s21_from_float_to_decimal(float, s21_decimal);
-int s21_from_decimal_to_int(s21_decimal, int);
-int s21_from_decimal_to_float(s21_decimal, float);
+int s21_from_int_to_decimal(int, s21_decimal *);
+int s21_from_float_to_decimal(float, s21_decimal *);
+int s21_from_decimal_to_int(s21_decimal, int *);
+int s21_from_decimal_to_float(s21_decimal, float *);
 
 /**
  * @group Other
