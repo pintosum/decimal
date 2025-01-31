@@ -43,7 +43,6 @@ void print_s21_decimal(s21_decimal r, char *name) {
   printf("%s : \n  ", name);
   char str[36] = {1};
   int len = s21_decimal_len_of_number(r);
-  printf("len : %d\n", len);
   int exp = r.fields.exp;
   if (exp < len) {
     len++;
@@ -254,20 +253,15 @@ s21_decimal s21_div_mantisses(s21_decimal num, s21_decimal div,
                               s21_decimal *remainder) {
   s21_decimal quot = {0};
   s21_decimal rem = {0};
-  print_dec(num, "num");
-  print_dec(div, "div");
   for (int i = s21_decimal_most_significant_bit(num) - 1; i >= 0; i--) {
-    //  printf("%d\n", i);
-    //   print_dec(quot, "quot");
-    // print_dec(rem, "rem");
     rem = s21_shift_mantissa_left_one(rem);
     rem.bits[0] |= s21_decimal_get_bit(num, i);
     if (s21_is_greater_or_equal(rem, div)) {
-      //     puts("statement entered");
       rem = s21_sub_mantisses(rem, div);
       quot = s21_decimal_set_bit(quot, i);
     }
   }
+  quot.fields.sign = num.fields.sign != div.fields.sign ? 1 : 0;
   if (remainder)
     *remainder = rem;
   return quot;
