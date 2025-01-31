@@ -4,6 +4,8 @@
 
 // #include "binary.h"
 #include "decimal.h"
+#define sizeofarray(a) (sizeof(a) / sizeof(a[0]))
+
 void print_uint256(uint256 a, char *name) {
   puts(name);
   unsigned char *byte = (unsigned char *)&a;
@@ -14,14 +16,14 @@ void print_uint256(uint256 a, char *name) {
 }
 
 uint256 uint256_and(uint256 a, uint256 b) {
-  for (int i = 0; i < 4; i++) {
+  for (int i = 0; i < sizeofarray(a.bits); i++) {
     a.bits[i] &= b.bits[i];
   }
   return a;
 }
 
 uint256 uint256_xor(uint256 a, uint256 b) {
-  for (int i = 0; i < 4; i++) {
+  for (int i = 0; i < sizeofarray(a.bits); i++) {
     a.bits[i] ^= b.bits[i];
   }
   return a;
@@ -30,7 +32,7 @@ uint256 uint256_xor(uint256 a, uint256 b) {
 uint256 shift_uint256_left_one(uint256 a) {
   uint256 shifted = a;
   uint64_t carry = 0;
-  for (int i = 0; i < 4; i++) {
+  for (int i = 0; i < sizeofarray(a.bits); i++) {
     shifted.bits[i] = a.bits[i] << 1;
     shifted.bits[i] |= carry;
     carry = a.bits[i] >> 63 & 1;
@@ -41,7 +43,7 @@ uint256 shift_uint256_left_one(uint256 a) {
 uint256 shift_uint256_right_one(uint256 a) {
   uint256 shifted = a;
   uint64_t carry = 0;
-  for (int i = 3; i >= 0; i--) {
+  for (int i = sizeofarray(a.bits) - 1; i >= 0; i--) {
     shifted.bits[i] = a.bits[i] >> 1;
     shifted.bits[i] |= carry << 63;
     carry = a.bits[i] & 1;
@@ -65,7 +67,7 @@ uint256 shift_uint256_right(uint256 a, unsigned int shift) {
 
 int uint256_is_zero(uint256 a) {
   int ret = 1;
-  for (int i = 0; i < 4; i++)
+  for (int i = 0; i < sizeofarray(a.bits); i++)
     ret *= !a.bits[i];
   return ret;
 }
@@ -73,7 +75,7 @@ int uint256_is_zero(uint256 a) {
 uint256 uint256_get_one() { return (uint256){{1, 0, 0, 0}}; }
 
 uint256 uint256_twos_complement(uint256 a) {
-  for (int i = 0; i < 4; i++) {
+  for (int i = 0; i < sizeofarray(a.bits); i++) {
     a.bits[i] = ~a.bits[i];
   }
   a = uint256_add(a, uint256_get_one());
@@ -209,7 +211,8 @@ uint256 uint256_divide_by_ten(uint256 value, unsigned int *remainder) {
   // print_uint256(a, "a");
   uint256 b = {{0x474, 0x23, 0, 0}};
   // print_uint256(b, "b");
-  //  printf("%lu\n", sizeof(a.bits));
+  int arr[10] = {0};
+  printf("%lu\n", sizeofarray(a.bits));
   shift_uint256_left(a, 1);
   uint256_add(a, b);
   // print_uint256(uint256_mult(a, b), "res");

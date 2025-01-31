@@ -9,6 +9,9 @@ void print_bytes(s21_decimal *value) {
   unsigned char *byte = (unsigned char *)value;
   for (int i = sizeof(s21_decimal) - 1; i >= 0; i--) {
     printf("%.2x ", *(byte + i));
+    if (i % 4 == 0) {
+      printf(" ");
+    }
   }
   printf("\n");
 }
@@ -32,7 +35,44 @@ int level_decimals(s21_decimal *value1, s21_decimal *value2, int *last_digit) {
       *value2 = s21_decimal_divide_by_ten(*value1, last_digit);
   }
   *value1 = s21_decimal_mult_by_pow_of_ten(value1, exp_diff);
-  return value1->fields.exp + exp_diff;
+  value1->fields.exp += exp_diff;
+  return 1;
+}
+
+int s21_sub(s21_decimal val1, s21_decimal val2, s21_decimal *res) {
+  int ret = 0;
+  s21_decimal result = {0};
+
+  if (res && s21_is_valid_decimal(&val1) && s21_is_valid_decimal(&val2)) {
+    uint32_t exp = level_decimals(&val1, &val2, NULL);
+    /*   puts("val1");
+       print_bytes(&val1);
+       puts("val2");
+       print_bytes(&val2);*/
+    if (!val1.fields.sign && val2.fields.sign) {
+      result = s21_add_mantisses(val1, val2);
+    } else if (val1.fields.sign && !val2.fields.sign) {
+      result = s21_add_mantisses(val2, val1);
+      // result.sign += dec2->sign;
+    } else {
+      result = s21_sub_mantisses(val1, val2);
+    }
+    // result.fields.exp = exp;
+    //  print_bytes(&result);
+    result = s21_normalize_decimal(result);
+    int valid = s21_is_valid_decimal(&result);
+    if (valid) {
+      *res = result;
+    } else if (result.fields.exp > 28 || result.fields.zero_bytes) {
+      ret = 1 + result.fields.sign;
+    } else {
+      ret = 4;
+    }
+
+  } else {
+    ret = 4;
+  }
+  return ret;
 }
 
 int s21_add(s21_decimal val1, s21_decimal val2, s21_decimal *res) {
@@ -41,9 +81,11 @@ int s21_add(s21_decimal val1, s21_decimal val2, s21_decimal *res) {
 
   if (res && s21_is_valid_decimal(&val1) && s21_is_valid_decimal(&val2)) {
     uint32_t exp = level_decimals(&val1, &val2, NULL);
-    print_bytes(&val1);
-    print_bytes(&val2);
-    if (!val1.fields.sign && val1.fields.sign) {
+    /*   puts("val1");
+       print_bytes(&val1);
+       puts("val2");
+       print_bytes(&val2);*/
+    if (!val1.fields.sign && val2.fields.sign) {
       result = s21_sub_mantisses(val1, val2);
     } else if (val1.fields.sign && !val2.fields.sign) {
       result = s21_sub_mantisses(val2, val1);
@@ -51,8 +93,8 @@ int s21_add(s21_decimal val1, s21_decimal val2, s21_decimal *res) {
     } else {
       result = s21_add_mantisses(val1, val2);
     }
-    result.fields.exp = exp;
-    print_bytes(&result);
+    // result.fields.exp = exp;
+    //  print_bytes(&result);
     result = s21_normalize_decimal(result);
     int valid = s21_is_valid_decimal(&result);
     if (valid) {
@@ -98,6 +140,45 @@ int s21_mul(s21_decimal val1, s21_decimal val2, s21_decimal *res) {
   return ret;
 }
 
+int s21_div(s21_decimal a, s21_decimal b, s21_decimal *res) {
+  int ret = 1;
+  if (res && s21_is_valid_decimal(&a) && s21_is_valid_decimal(&b)) {
+    s21_decimal rem = {0};
+    s21_decimal result = {0};
+    level_decimals(&a, &b, NULL);
+    //  int exp = 30 - a.fields.exp;
+    //   a = s21_decimal_mult_by_pow_of_ten(&a, exp);
+    result.fields.exp = -1;
+    s21_decimal temp = {0};
+    do {
+      /*      puts("\n");
+            print_bytes(&a);
+            puts("\n");*/
+      temp = s21_div_mantisses(a, b, &rem);
+
+      /*      puts("\nrem");
+            print_bytes(&rem);
+            puts("\n");*/
+      result = s21_decimal_mult_by_pow_of_ten(&result, 1);
+      result = s21_add_mantisses(result, temp);
+      a = s21_decimal_mult_by_pow_of_ten(&rem, 1);
+
+      /*puts("\na");
+      print_bytes(&a);
+      puts("\n");*/
+
+      result.fields.exp++;
+      puts("\nloop");
+    } while (!s21_decimal_is_zero(&rem) &&
+             s21_decimal_len_of_number(result) < 29);
+    ret = 0;
+    *res = result;
+    printf("\nexp : %u\n", result.fields.exp);
+  }
+  return ret;
+}
+
+
 int main() {
   // s21_decimal dec = {0};
   // dec_map m = {{0, 0, 0x800000}, 0, 0, 0, 0};
@@ -109,11 +190,19 @@ int main() {
 
   // print_bytes((s21_decimal *)&m);
 
-  s21_decimal f = {0x21ffffff, 0xaf24ffff, 0, 1 << 16};
-  s21_decimal s = {0x12344fff, 0xffff323f, 0xff, 5 << 16};
-  s.fields.sign = 1;
+  s21_decimal f = {0xb2400000, 0x19e0c9ba, 0x21e, 1 << 16};
+  s21_decimal s = {0xb2400000, 0x19e0c9ba, 0x21e, 2 << 16};
+  s21_decimal num = {10, 0, 0, 0};
+  s21_decimal div = {7, 0, 0, 1 << 31};
+  div.fields.sign = 1;
+  // s21_decimal s = {0x01, 0x0, 0x0, 2 << 16};
+  // s21_decimal f = {0x01, 0x0, 0x0, 1 << 16};
+  // s.fields.sign = 0;
   s21_decimal result = {0};
-  int ret = s21_mul(f, s, &result);
+  int ret = s21_mul(num, div, &result);
   printf("ret : %d\n", ret);
-  print_bytes(&result);
+  //print_bytes(&result);
+  print_dec(result, "result");
+  //result = s21_decimal_from_string("-1.123456789123456789123456789123123123");
+  print_s21_decimal(result, "result");
 }
