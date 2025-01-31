@@ -16,7 +16,7 @@ uint256 uint256_and(uint256, uint256);
 uint256 uint256_add(uint256, uint256);
 uint256 uint256_sub(uint256, uint256);
 uint256 uint256_mult(uint256, uint256);
-uint256 uint256_div(uint256, uint256);
+uint256 uint256_div(uint256, uint256, uint256 *);
 uint256 uint256_divide_by_ten(uint256, unsigned int *);
 uint256 uint256_mult_by_pow_of_ten(uint256 ret, int power);
 

@@ -1,8 +1,17 @@
 #include "uint256.h"
 
+#include "binary.h"
 #include "decimal.h"
 #define sizeofarray(a) (sizeof(a) / sizeof(a[0]))
 
+void print_uint256(uint256 a, char *name) {
+  puts(name);
+  unsigned char *byte = (unsigned char *)&a;
+  for (int i = sizeof(uint256) / 4 - 1; i >= 0; i--) {
+    printf("%.2x ", *(byte + i));
+  }
+  puts("");
+}
 
 uint256 uint256_and(uint256 a, uint256 b) {
   for (int i = 0; i < sizeofarray(a.bits); i++) {
@@ -144,21 +153,67 @@ int len_of_uint256(uint256 value) {
   return (int)(binary_len * log_of_2) + 1;
 }
 
+unsigned int uint256_get_bit(uint256 a, unsigned int bit) {
+  int i = bit / 64;
+  int b = bit % 64;
+  return (a.bits[i] >> b) & 1;
+}
+
+uint256 uint256_set_bit(uint256 a, unsigned int bit) {
+  unsigned int i = bit / 64;
+  unsigned int b = bit % 64;
+  a.bits[i] ^= 1 << b;
+  return a;
+}
+
+int uint256_is_greater_or_equal(uint256 a, uint256 b) {
+  int ret = 0;
+  int i = 3;
+  while (i >= 0 && a.bits[i] == b.bits[i]) {
+    i--;
+  }
+
+  if (i >= 0) {
+    ret = a.bits[i] >= b.bits[i];
+  } else {
+    ret = 1;
+  }
+
+  return ret;
+}
+
+uint256 uint256_div(uint256 num, uint256 div, uint256 *remainder) {
+  uint256 quot = {0};
+  uint256 rem = {0};
+  for (int i = uint256_most_significant_bit(num) - 1; i >= 0; i--) {
+    rem = shift_uint256_left_one(rem);
+    rem.bits[0] |= uint256_get_bit(num, i);
+    if (uint256_is_greater_or_equal(rem, div)) {
+      rem = uint256_sub(rem, div);
+      quot = uint256_set_bit(quot, i);
+    }
+  }
+  if (remainder)
+    *remainder = rem;
+  return quot;
+}
+
 s21_decimal s21_decimal_from_uint256(uint256 a) {
   s21_decimal ret = {0};
-  int len = len_of_uint256(a);
+  int msb = uint256_most_significant_bit(a);
   unsigned int digit = 0;
-  while (len > 29) {
+  while (msb > 95) {
     a = uint256_divide_by_ten(a, &digit);
-    len--;
+    printf("digit : %d\n", digit);
     ret.fields.exp--;
+    msb = uint256_most_significant_bit(a);
   }
 
   ret.bits[0] = a.bits[0] & 0xFFFFFFFF;
-  ret.bits[1] = a.bits[0] & 0xFFFFFFFF00000000;
+  ret.bits[1] = a.bits[0] >> 32;
   ret.bits[2] = a.bits[1] & 0xFFFFFFFF;
 
-  if(digit >= 5){
+  if (digit >= 5) {
     a = uint256_add(a, uint256_get_one());
   }
   return ret;
@@ -193,4 +248,3 @@ uint256 uint256_divide_by_ten(uint256 value, unsigned int *remainder) {
     *remainder = r.bits[0];
   return q;
 }
-
