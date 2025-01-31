@@ -193,8 +193,7 @@ int main() {
   s21_decimal f = {0xb2400000, 0x19e0c9ba, 0x21e, 1 << 16};
   s21_decimal s = {0xb2400000, 0x19e0c9ba, 0x21e, 2 << 16};
   s21_decimal num = {10, 0, 0, 0};
-  s21_decimal div = {7, 0, 0, 1 << 31};
-  div.fields.sign = 1;
+  s21_decimal div = {7, 0, 0, 0};
   // s21_decimal s = {0x01, 0x0, 0x0, 2 << 16};
   // s21_decimal f = {0x01, 0x0, 0x0, 1 << 16};
   // s.fields.sign = 0;
@@ -203,6 +202,7 @@ int main() {
   printf("ret : %d\n", ret);
   //print_bytes(&result);
   print_dec(result, "result");
-  //result = s21_decimal_from_string("-1.123456789123456789123456789123123123");
+  result = s21_decimal_from_string("-1.123456789123456789123456789123123123");
   print_s21_decimal(result, "result");
+  //print_bytes(&result);
 }

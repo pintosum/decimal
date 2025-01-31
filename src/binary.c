@@ -43,6 +43,7 @@ void print_s21_decimal(s21_decimal r, char *name) {
   printf("%s : \n  ", name);
   char str[36] = {1};
   int len = s21_decimal_len_of_number(r);
+  printf("len : %d\n", len);
   int exp = r.fields.exp;
   if (exp < len) {
     len++;
