@@ -233,8 +233,11 @@ int s21_decimal_is_divisible_by_ten(s21_decimal value) {
 
 s21_decimal s21_decimal_divide_by_ten(s21_decimal value, int *remainder) {
   uint64_t rem = 0;
+  uint64_t digit = (uint64_t)value.fields.zero_bytes;
+  value.fields.zero_bytes = digit / 10;
+  rem = digit % 10;
   for (int i = 2; i >= 0; i--) {
-    uint64_t digit = (uint64_t)value.fields.mantissa[i] + rem * (1ULL << 32);
+    digit = (uint64_t)value.fields.mantissa[i] + rem * (1ULL << 32);
     value.fields.mantissa[i] = digit / 10;
     rem = digit % 10;
   }
@@ -288,6 +291,14 @@ s21_decimal s21_normalize_decimal(s21_decimal value) {
   while (value.fields.exp && s21_decimal_is_divisible_by_ten(value)) {
     value = s21_decimal_divide_by_ten(value, NULL);
     value.fields.exp--;
+  }
+  int last_digit = 0;
+  while(value.fields.zero_bytes){
+    value = s21_decimal_divide_by_ten(value, &last_digit);
+    value.fields.exp--;
+  }
+  if(last_digit > 5 || (last_digit == 5 && value.bits[0] % 2)){
+    value = s21_add_mantisses(value, s21_decimal_get_one());
   }
   return value;
 }
