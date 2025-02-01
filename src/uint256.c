@@ -1,10 +1,24 @@
 #include "uint256.h"
 
-#include "binary.h"
 #include "decimal.h"
 #define sizeofarray(a) (sizeof(a) / sizeof(a[0]))
 
-void print_uint256(uint256 a, char *name) {
+void print_uint256(uint256 r, char *name) {
+  printf("%s : \n  ", name);
+  char str[80] = {1};
+  int len = len_of_uint256(r);
+  int i = 0;
+  do {
+    i++;
+    unsigned int digit = 0;
+    r = uint256_divide_by_ten(r, &digit);
+    str[--len] = digit + '0';
+  } while (!uint256_is_zero(r));
+
+  printf("%s\n", str);
+}
+
+void print_uint256_bytes(uint256 a, char *name) {
   puts(name);
   unsigned char *byte = (unsigned char *)&a;
   for (int i = sizeof(uint256) / 4 - 1; i >= 0; i--) {
@@ -148,9 +162,11 @@ int uint256_most_significant_bit(uint256 value) {
 }
 
 int len_of_uint256(uint256 value) {
-  double log_of_2 = 0.301;
-  int binary_len = uint256_most_significant_bit(value);
-  return (int)(binary_len * log_of_2) + 1;
+  int ret = 0;
+  while(!uint256_is_zero(value)){
+    value = uint256_divide_by_ten(value, NULL);
+  }
+  return ret;
 }
 
 unsigned int uint256_get_bit(uint256 a, unsigned int bit) {

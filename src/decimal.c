@@ -5,7 +5,7 @@
 #include "binary.h"
 #include "uint256.h"
 
-int s21_sub(s21_decimal val1, s21_decimal val2, s21_decimal *res) {
+/*int s21_sub(s21_decimal val1, s21_decimal val2, s21_decimal *res) {
   int ret = 0;
   s21_decimal result = {0};
 
@@ -36,6 +36,11 @@ int s21_sub(s21_decimal val1, s21_decimal val2, s21_decimal *res) {
     ret = 4;
   }
   return ret;
+}*/
+
+int s21_sub(s21_decimal val1, s21_decimal val2, s21_decimal *res) {
+  val2.fields.sign++;
+  return s21_add(val1, val2, res);
 }
 
 int s21_add(s21_decimal val1, s21_decimal val2, s21_decimal *res) {
@@ -72,6 +77,7 @@ s21_decimal s21_mul_handle(s21_decimal a, s21_decimal b) {
   uint256 val1 = uint256_from_decimal(a);
   uint256 val2 = uint256_from_decimal(b);
   uint256 result = uint256_mult(val1, val2);
+  print_uint256(result, "uint256 result");
   ret = s21_decimal_from_uint256(result);
   ret.fields.exp += a.fields.exp + b.fields.exp;
   ret.fields.sign = a.fields.sign != b.fields.sign ? 1 : 0;
@@ -85,6 +91,7 @@ int s21_mul(s21_decimal val1, s21_decimal val2, s21_decimal *res) {
 
   if (res && s21_is_valid_decimal(&val1) && s21_is_valid_decimal(&val2)) {
     result = s21_mul_handle(val1, val2);
+    result = s21_normalize_decimal(result);
     if (s21_is_valid_decimal(&result)) {
       *res = result;
     } else {
@@ -119,11 +126,10 @@ int s21_div(s21_decimal a, s21_decimal b, s21_decimal *res) {
       i++;
 
       // result.fields.exp++;
-    } while (!uint256_is_zero(rem) &&
-             i < 30);
+    } while (!uint256_is_zero(rem) && i < 30);
     unsigned int digit = 0;
     res256 = uint256_divide_by_ten(res256, &digit);
-    if(digit > 5 || (digit == 5 && res256.bits[0] % 2)){
+    if (digit > 5 || (digit == 5 && res256.bits[0] % 2)) {
       res256 = uint256_add(res256, uint256_get_one());
     }
     ret = 0;
@@ -137,18 +143,18 @@ int s21_div(s21_decimal a, s21_decimal b, s21_decimal *res) {
 }
 
 int main() {
-  s21_decimal a = s21_decimal_from_string("55555555555555555555555555555");
-  s21_decimal b = s21_decimal_from_string("0.5");
-  printf("exp b %d\n",a.fields.exp);
+  s21_decimal a = s21_decimal_from_string("79228162514264337593543950335");
+  s21_decimal b = s21_decimal_from_string("0.13");
+  printf("exp b %d\n", a.fields.exp);
   printf("a sign : %d\n", a.fields.sign);
   printf("r sign : %d\n", b.fields.sign);
   s21_decimal result = {0};
-  int ret = s21_sub(a, b, &result);
+  int ret = s21_mul(a, b, &result);
   printf("ret : %d\n", ret);
 
   print_s21_decimal(a, "a");
   print_s21_decimal(b, "b");
   print_s21_decimal(result, "result");
-  printf("exp %d\n",result.fields.exp);
+  printf("exp %d\n", result.fields.exp);
   print_dec(result, "ints");
 }

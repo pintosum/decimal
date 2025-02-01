@@ -25,5 +25,7 @@ uint256 uint256_twos_complement(uint256);
 uint256 uint256_get_one();
 uint256 uint256_from_decimal(s21_decimal a);
 s21_decimal s21_decimal_from_uint256(uint256 a);
+void print_uint256(uint256, char *);
+int len_of_uint256(uint256);
 
 #endif

@@ -218,9 +218,12 @@ int s21_decimal_most_significant_bit(s21_decimal value) {
 }
 
 int s21_decimal_len_of_number(s21_decimal value) {
-  double log_of_2 = 0.301;
-  int binary_len = s21_decimal_most_significant_bit(value);
-  return (int)(binary_len * log_of_2) + 1;
+  int ret = 0;
+  while(!s21_decimal_is_zero(&value)){
+    ret++;
+    value = s21_decimal_divide_by_ten(value, NULL);
+  }
+  return ret;
 }
 
 int s21_decimal_is_divisible_by_ten(s21_decimal value) {
