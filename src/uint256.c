@@ -5,7 +5,7 @@
 
 void print_uint256(uint256 r, char *name) {
   printf("%s : \n  ", name);
-  char str[80] = {1};
+  char str[100] = {1};
   int len = len_of_uint256(r);
   int i = 0;
   do {
@@ -165,6 +165,7 @@ int len_of_uint256(uint256 value) {
   int ret = 0;
   while(!uint256_is_zero(value)){
     value = uint256_divide_by_ten(value, NULL);
+    ret++;
   }
   return ret;
 }
@@ -220,8 +221,7 @@ s21_decimal s21_decimal_from_uint256(uint256 a) {
   unsigned int digit = 0;
   while (msb > 95) {
     a = uint256_divide_by_ten(a, &digit);
-    printf("digit : %d\n", digit);
-    ret.fields.exp--;
+    ret.fields.exp++;
     msb = uint256_most_significant_bit(a);
   }
 

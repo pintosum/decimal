@@ -19,7 +19,7 @@ START_TEST(s21_test) {
 }
 
 START_TEST(s21_sub_normal) {
-  s21_decimal value_1 = {0};
+  s21_decimal value_1 = s21_decimal_from_string("155");
   s21_decimal value_2 = {0};
   s21_decimal result = {0};
   value_1.bits[0] = 155;
@@ -756,12 +756,12 @@ Suite *test_s21_arithmetic_suite(void) {
   tcase_add_test(tc_sub, s21_sub_inf);
   suite_add_tcase(s, tc_sub);
 
-  /*tc_sum = tcase_create("sum");
+  tc_sum = tcase_create("sum");
   tcase_add_test(tc_sum, s21_sum_normal);
   tcase_add_test(tc_sum, s21_sum_both_neg);
   tcase_add_test(tc_sum, s21_one_sign);
   tcase_add_test(tc_sum, s21_sum_error);
- // tcase_add_test(tc_sum, s21_one_greater);
+  tcase_add_test(tc_sum, s21_one_greater);
   suite_add_tcase(s, tc_sum);
 
   tc_div = tcase_create("div");
@@ -779,7 +779,8 @@ Suite *test_s21_arithmetic_suite(void) {
   tcase_add_test(tc_div, s21_div_min_pow);
   tcase_add_test(tc_div, s21_div_min_pow_second_dec);
   tcase_add_test(tc_div, s21_div_pow_small);
-  //suite_add_tcase(s, tc_div);*/
+  suite_add_tcase(s, tc_div);
+
   tc_test = tcase_create("s21_test");
   tcase_add_test(tc_test, test);
   suite_add_tcase(s, tc_test);

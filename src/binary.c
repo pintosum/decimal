@@ -5,6 +5,18 @@
 #include <string.h>
 
 #include "decimal.h"
+
+int s21_is_greater_or_equal(s21_decimal a, s21_decimal b) {
+  a.bits[3] = a.fields.zero_bytes;
+  b.bits[3] = b.fields.zero_bytes;
+  int f = s21_decimal_most_significant_bit(a) / 32;
+  int s = s21_decimal_most_significant_bit(b) / 32;
+  f = f > s ? f : s;
+  return a.bits[f] >= b.bits[f];
+}
+
+
+
 void swap_ptr(void **ptr1, void **ptr2) {
   void *temp = *ptr1;
   *ptr1 = *ptr2;
@@ -13,7 +25,7 @@ void swap_ptr(void **ptr1, void **ptr2) {
 
 int level_decimals(s21_decimal *value1, s21_decimal *value2, int *last_digit) {
   int exp_diff = value2->fields.exp - value1->fields.exp;
-  printf("exp dif  : %d\n",exp_diff);
+  //printf("exp dif  : %d\n",exp_diff);
   if (exp_diff < 0) {
     swap_ptr((void **)&value1, (void **)&value2);
     exp_diff = -exp_diff;
@@ -25,7 +37,7 @@ int level_decimals(s21_decimal *value1, s21_decimal *value2, int *last_digit) {
       *value2 = s21_decimal_divide_by_ten(*value1, last_digit);
   }
   *value1 = s21_decimal_mult_by_pow_of_ten(value1, exp_diff);
-  printf("value exp : %d\n",value1->fields.exp);
+  //printf("value exp : %d\n",value1->fields.exp);
   value1->fields.exp += exp_diff;
   return 1;
 }
@@ -256,15 +268,6 @@ s21_decimal s21_decimal_set_bit(s21_decimal a, unsigned int bit) {
   return a;
 }
 
-int s21_is_greater_or_equal(s21_decimal a, s21_decimal b) {
-  a.bits[3] = a.fields.zero_bytes;
-  b.bits[3] = b.fields.zero_bytes;
-  int f = s21_decimal_most_significant_bit(a) / 32;
-  int s = s21_decimal_most_significant_bit(b) / 32;
-  f = f > s ? f : s;
-  return a.bits[f] >= b.bits[f];
-}
-
 unsigned int s21_decimal_get_bit(s21_decimal a, unsigned int bit) {
   unsigned int i = bit / 32;
   unsigned int b = bit % 32;
@@ -307,6 +310,6 @@ s21_decimal s21_normalize_decimal(s21_decimal value) {
 }
 
 int s21_is_valid_decimal(s21_decimal *val) {
-  return val->fields.exp <= 28 && !val->fields.signal_bits &&
+  return val->fields.exp <= 29 && !val->fields.signal_bits &&
          !val->fields.zero_bytes;
 }
