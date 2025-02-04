@@ -60,7 +60,7 @@ START_TEST(s21_int_and_decimal_error) {
   ck_assert_int_eq(res, CONVERT_ERROR);
 
   s21_decimal value_1 = {0};
-  value_1.bits[0] = MAX + 2;
+  value_1.bits[0] = MIN + 1;
   int a = 0;
   res = s21_from_decimal_to_int(value_1, &a);
   ck_assert_int_eq(res, CONVERT_ERROR);

@@ -16,6 +16,7 @@
 
 Suite *test_s21_convertors_test(void);
 Suite *test_s21_arithmetic_suite(void);
+Suite *test_s21_other_tests(void);
 
 int wrapper_s21_is_less(s21_decimal a, s21_decimal b);
 int wrapper_s21_is_equal(s21_decimal a, s21_decimal b);

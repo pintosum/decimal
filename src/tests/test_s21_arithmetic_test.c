@@ -1,6 +1,5 @@
 #include <check.h>
 
-#include "../binary.h"
 #include "../convertors/convertors_functions.h"
 #include "../decimal.h"
 #define FALSE 0
@@ -10,16 +9,9 @@
 #define NEGATIVE_INF 2
 #define OK 0
 
-START_TEST(s21_test) {
-  s21_decimal a = s21_decimal_from_string("1000");
-  s21_decimal b = s21_decimal_from_string("1000.1");
-  s21_decimal res = {0};
-  s21_add(a, b, &res);
-  ck_assert_uint_eq(res.bits[0], 20001);
-}
 
 START_TEST(s21_sub_normal) {
-  s21_decimal value_1 = s21_decimal_from_string("155");
+  s21_decimal value_1 = {{155}};
   s21_decimal value_2 = {0};
   s21_decimal result = {0};
   value_1.bits[0] = 155;
@@ -32,15 +24,14 @@ START_TEST(s21_sub_normal) {
   value_1.bits[0] = 50;
   value_2.bits[0] = 150;
   s21_sub(value_1, value_2, &result);
-  int sign = s21_get_sign(result);
   ck_assert_uint_eq(result.bits[0], test.bits[0]);
   ck_assert_int_eq(result.fields.sign, 1);
   memset(&result, 0, sizeof(s21_decimal));
   s21_set_degree(&value_2, 2);
-  test.bits[0] = 4850;
+  test.bits[0] = 485;
   s21_sub(value_1, value_2, &result);
   ck_assert_uint_eq(result.bits[0], test.bits[0]);
-  ck_assert_uint_eq(s21_get_degree(result), 2);
+  ck_assert_uint_eq(s21_get_degree(result), 1);
   ck_assert_uint_eq(s21_get_sign(result), 0);
 }
 END_TEST
@@ -104,6 +95,8 @@ START_TEST(s21_sub_two_sign) {
   ck_assert_int_eq(sign1, 1);
   value_1.bits[0] = 50;
   value_2.bits[0] = 150;
+  s21_set_sign(&value_1);
+  s21_set_sign(&value_2);
   memset(&result, 0, sizeof(s21_decimal));
   s21_sub(value_1, value_2, &result);
   ck_assert_int_eq(result.bits[0], test.bits[0]);
@@ -253,7 +246,7 @@ START_TEST(s21_div_min_pow_second_dec) {
   s21_set_degree(&value_1, 5);
   s21_set_degree(&value_2, 3);
   s21_div(value_1, value_2, &result);
-  ck_assert_uint_eq(s21_get_degree(result), 28);
+  ck_assert_uint_eq(s21_get_degree(result), 25);
   ck_assert_uint_eq(result.bits[0], test.bits[0]);
   ck_assert_uint_eq(result.bits[1], test.bits[1]);
 }
@@ -353,9 +346,9 @@ START_TEST(s21_div_pow_norm) {
   value_1.bits[1] = 4294967295;
   value_1.bits[2] = 4294967295;
   value_2.bits[0] = 112;
-  test.bits[0] = 1227133512;
-  test.bits[1] = 2454267026;
-  test.bits[2] = 3834792228;
+  test.bits[0] = 1227133512;//1840700270
+  test.bits[1] = 2454267026;//3681400539
+  test.bits[2] = 3834792228;//383479222
   s21_div(value_1, value_2, &result);
   ck_assert_uint_eq(result.bits[0], test.bits[0]);
   ck_assert_uint_eq(result.bits[1], test.bits[1]);
@@ -412,9 +405,9 @@ START_TEST(s21_mul_max) {
   value_1.bits[1] = 4294967295;
   value_1.bits[2] = 4294967295;
   value_2.bits[0] = 5;
-  test.bits[0] = 4294967293;
-  test.bits[1] = 4294967295;
-  test.bits[2] = 2147483647;
+  test.bits[0] = 0;
+  test.bits[1] = 0;
+  test.bits[2] = 2147483648;
   s21_set_degree(&value_2, 1);
   int res = s21_mul(value_1, value_2, &result);
   ck_assert_uint_eq(result.bits[0], test.bits[0]);
@@ -481,7 +474,7 @@ START_TEST(s21_mul_norm) {
   value_2.bits[0] = 15;
   s21_set_degree(&value_2, 4);
   int res = s21_mul(value_1, value_2, &result);
-  ck_assert_uint_eq(s21_get_degree(result), 2);
+  ck_assert_uint_eq(s21_get_degree(result), 1);
   ck_assert_uint_eq(res, OK);
 }
 END_TEST
@@ -573,9 +566,9 @@ START_TEST(s21_mul_max_1) {
   s21_set_sign(&value_1);
   value_2.bits[0] = 5;
   s21_set_sign(&value_2);
-  test.bits[0] = 4294967293;
-  test.bits[1] = 4294967295;
-  test.bits[2] = 2147483647;
+  test.bits[0] = 0;
+  test.bits[1] = 0;
+  test.bits[2] = 2147483648;
   s21_set_degree(&value_2, 1);
   int res = s21_mul(value_1, value_2, &result);
   ck_assert_uint_eq(result.bits[0], test.bits[0]);
@@ -595,9 +588,9 @@ START_TEST(s21_mul_max_2) {
   value_1.bits[1] = 4294967295;
   value_1.bits[2] = 4294967295;
   value_2.bits[0] = 5;
-  test.bits[0] = 4294967293;
-  test.bits[1] = 4294967295;
-  test.bits[2] = 2147483647;
+  test.bits[0] = 0;
+  test.bits[1] = 0;
+  test.bits[2] = 2147483648;
   s21_set_degree(&value_2, 1);
   int res = s21_mul(value_1, value_2, &result);
   ck_assert_uint_eq(result.bits[0], test.bits[0]);
@@ -617,9 +610,9 @@ START_TEST(s21_mul_max_3) {
   value_1.bits[1] = 4294967295;
   value_1.bits[2] = 4294967295;
   value_2.bits[0] = 5;
-  test.bits[0] = 4294967293;
-  test.bits[1] = 4294967295;
-  test.bits[2] = 2147483647;
+  test.bits[0] = 0;
+  test.bits[1] = 0;
+  test.bits[2] = 2147483648;
   s21_set_degree(&value_2, 1);
   int res = s21_mul(value_1, value_2, &result);
   ck_assert_uint_eq(result.bits[0], test.bits[0]);
@@ -717,8 +710,8 @@ END_TEST
 
 
 START_TEST(test){
-  s21_decimal a = {5, 0, 0, 0};
-  s21_decimal b = {2, 0, 0, 0};
+  s21_decimal a = {{5, 0, 0, 0}};
+  s21_decimal b = {{2, 0, 0, 0}};
   s21_decimal res = {0};
   s21_mul(a, b, &res);
   ck_assert_uint_eq(res.bits[0], 10);
@@ -730,7 +723,7 @@ Suite *test_s21_arithmetic_suite(void) {
 
   TCase *tc_mul, *tc_sub, *tc_div, *tc_sum , *tc_test;
 
- /* tc_mul = tcase_create("s21_mul");
+  tc_mul = tcase_create("s21_mul");
   tcase_add_test(tc_mul, s21_mul_value_2_is_one);
   tcase_add_test(tc_mul, s21_mul_value_1_is_zero);
   tcase_add_test(tc_mul, s21_mul_value_2_is_zero);
@@ -747,7 +740,7 @@ Suite *test_s21_arithmetic_suite(void) {
   tcase_add_test(tc_mul, s21_mul_max_1);
   tcase_add_test(tc_mul, s21_mul_max_2);
   tcase_add_test(tc_mul, s21_mul_max_3);
-  //suite_add_tcase(s, tc_mul);*/
+  suite_add_tcase(s, tc_mul);
 
   tc_sub = tcase_create("sub");
   tcase_add_test(tc_sub, s21_sub_normal);

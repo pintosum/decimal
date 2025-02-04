@@ -3,7 +3,7 @@
 #include "decimal.h"
 
 typedef struct {
-  uint64_t bits[4];
+  uint32_t bits[8];
 } uint256;
 
 uint256 shift_uint256_left_one(uint256);
@@ -14,11 +14,13 @@ uint256 uint256_xor(uint256, uint256);
 uint256 uint256_and(uint256, uint256);
 
 uint256 uint256_add(uint256, uint256);
-uint256 uint256_sub(uint256, uint256);
+uint256 uint256_sub(uint256, uint256, int *);
 uint256 uint256_mult(uint256, uint256);
 uint256 uint256_div(uint256, uint256, uint256 *);
 uint256 uint256_divide_by_ten(uint256, unsigned int *);
 uint256 uint256_mult_by_pow_of_ten(uint256 ret, int power);
+int uint256_is_less(uint256, uint256);
+int uint256_most_significant_bit(uint256 value);
 
 int uint256_is_zero(uint256);
 uint256 uint256_twos_complement(uint256);
@@ -26,6 +28,7 @@ uint256 uint256_get_one();
 uint256 uint256_from_decimal(s21_decimal a);
 s21_decimal s21_decimal_from_uint256(uint256 a);
 void print_uint256(uint256, char *);
+void print_uint256_bytes(uint256, char *);
 int len_of_uint256(uint256);
 
 #endif

@@ -3,7 +3,8 @@
 int main(void) {
   int failed = 0, total = 0;
   Suite *s21_decimal_test[] = {test_s21_convertors_test(),
-                               test_s21_arithmetic_suite(), NULL};
+                               test_s21_arithmetic_suite(),
+                               test_s21_other_tests(), NULL};
   int all_tests = 0;
   for (; s21_decimal_test[all_tests] != NULL; all_tests++) {
     SRunner *sr = srunner_create(s21_decimal_test[all_tests]);

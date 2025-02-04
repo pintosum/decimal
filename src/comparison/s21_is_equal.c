@@ -11,10 +11,8 @@ int s21_is_equal(s21_decimal a, s21_decimal b) {
     } else if (a.fields.sign == b.fields.sign) {
       s21_decimal a_copy = a;
       s21_decimal b_copy = b;
-      int last_digit = 0;
 
-      level_decimals((s21_decimal *)&a_copy, (s21_decimal *)&b_copy,
-                     &last_digit);
+      level_decimals((s21_decimal *)&a_copy, (s21_decimal *)&b_copy);
 
       s21_decimal diff = s21_sub_mantisses(b_copy, a_copy);
       result = s21_decimal_is_zero(&diff);

@@ -1,7 +1,13 @@
 #include "convertors_functions.h"
 
+#ifdef MAX
+#undef MAX
 #define MAX 79228162514264337593543950335.0F
+#endif
+#ifdef MIN
+#undef MIN
 #define MIN 1e-28
+#endif
 
 int s21_from_float_to_decimal(float src, s21_decimal *dst) {
   if (src == S21_POSITIVE_INF || src != src || dst == NULL ||

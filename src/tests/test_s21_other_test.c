@@ -31,7 +31,7 @@ START_TEST(test_s21_truncate_negative_with_fraction) {
   ck_assert_int_eq(result.bits[0], 10);
   ck_assert_int_eq(result.bits[1], 0);
   ck_assert_int_eq(result.bits[2], 0);
-  ck_assert_int_eq(result.bits[3], (1 << 31));
+  ck_assert_int_eq(result.bits[3], (1U << 31));
 }
 END_TEST
 
@@ -60,7 +60,7 @@ START_TEST(test_s21_truncate_min_negative) {
   ck_assert_int_eq(result.bits[0], 0xFFFFFFFF);
   ck_assert_int_eq(result.bits[1], 0xFFFFFFFF);
   ck_assert_int_eq(result.bits[2], 0xFFFFFFFF);
-  ck_assert_int_eq(result.bits[3], 1 << 31);
+  ck_assert_int_eq(result.bits[3], 1U << 31);
 }
 END_TEST
 
@@ -93,7 +93,7 @@ START_TEST(test_s21_floor_negative_with_fraction) {
   ck_assert_int_eq(result.bits[0], 11);
   ck_assert_int_eq(result.bits[1], 0);
   ck_assert_int_eq(result.bits[2], 0);
-  ck_assert_int_eq(result.bits[3], (1 << 31));
+  ck_assert_int_eq(result.bits[3], (1U << 31));
 }
 END_TEST
 
@@ -116,11 +116,11 @@ START_TEST(test_s21_floor_min_negative) {
   ck_assert_int_eq(result.bits[0], 0xFFFFFFFF);
   ck_assert_int_eq(result.bits[1], 0xFFFFFFFF);
   ck_assert_int_eq(result.bits[2], 0xFFFFFFFF);
-  ck_assert_int_eq(result.bits[3], 1 << 31);
+  ck_assert_int_eq(result.bits[3], 1U << 31);
 }
 END_TEST
 
-Suite *s21_other_tests(void) {
+Suite *test_s21_other_tests(void) {
   Suite *s = suite_create(BLUE "s21_other_tests" NOCOLOR);
   TCase *tc_truncate = tcase_create("truncate");
   TCase *tc_floor = tcase_create("floor");

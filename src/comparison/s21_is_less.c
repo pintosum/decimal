@@ -13,9 +13,8 @@ int s21_is_less(s21_decimal a, s21_decimal b) {
     } else {
       s21_decimal a_copy = a;
       s21_decimal b_copy = b;
-      int last_digit = 0;
 
-      level_decimals(&a_copy, &b_copy, &last_digit);
+      level_decimals(&a_copy, &b_copy);
 
       int i = 2;
       while (i >= 0 && a_copy.bits[i] == b_copy.bits[i]) {
